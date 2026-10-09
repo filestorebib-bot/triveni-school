@@ -1,8 +1,19 @@
+
 import React, { useState, useEffect } from "react";
-import { 
-  Menu, X, MapPin, Phone, Mail, Leaf, GraduationCap, 
-  ChevronDown, ArrowRight, Sparkles, BookOpen, Clock, Code2
+import {
+  Menu,
+  X,
+  MapPin,
+  Phone,
+  Mail,
+  Leaf,
+  ChevronDown,
+  ArrowRight,
+  Clock,
+  Code2,
+  GraduationCap,
 } from "lucide-react";
+
 import { SCHOOL_INFO } from "../data/schoolData";
 
 export default function Navbar({ onOpenDeveloper, onSelectGrade }) {
@@ -11,11 +22,32 @@ export default function Navbar({ onOpenDeveloper, onSelectGrade }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        setClassDropdownOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => window.removeEventListener("keydown", handleEscape);
   }, []);
 
   const navLinks = [
@@ -23,119 +55,202 @@ export default function Navbar({ onOpenDeveloper, onSelectGrade }) {
     { label: "About Us", href: "#about" },
     { label: "Program", href: "#program" },
     { label: "OJT", href: "#ojt" },
-    { 
-      label: "Class (9, 10, 11, 12)", 
+    {
+      label: "Classes",
       href: "#classes",
-      isClassMenu: true 
+      isClassMenu: true,
     },
     { label: "Notices", href: "#notices" },
-    { label: "Contact Us", href: "#contact" }
+    { label: "Contact Us", href: "#contact" },
   ];
 
   const handleClassClick = (grade) => {
     if (onSelectGrade) onSelectGrade(grade);
+
     setClassDropdownOpen(false);
     setMobileMenuOpen(false);
-    const element = document.querySelector("#classes");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+
+    window.setTimeout(() => {
+      document.querySelector("#classes")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
   };
 
+  const closeMenu = () => {
+    setMobileMenuOpen(false);
+    setClassDropdownOpen(false);
+  };
+
+  const handleDeveloperClick = () => {
+    closeMenu();
+    onOpenDeveloper?.();
+  };
+
+  const grades = ["9", "10", "11", "12"];
+
+  const desktopLinkClass =
+    "inline-flex shrink-0 items-center justify-center whitespace-nowrap " +
+    "rounded-xl px-2.5 py-2 text-[12px] font-bold text-slate-700 " +
+    "transition-colors hover:bg-emerald-50 hover:text-emerald-800 " +
+    "2xl:px-3 2xl:text-[13px]";
+
+  const actionButtonClass =
+    "inline-flex shrink-0 items-center justify-center gap-1.5 " +
+    "whitespace-nowrap rounded-xl px-3 py-2 text-xs font-bold " +
+    "transition-all duration-200";
+
   return (
-    <header className="sticky top-0 z-40 w-full transition-all duration-300">
-      {/* Topmost School Info Contact Bar */}
-      <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-green-950 text-emerald-100 text-[11px] py-1.5 px-4 border-b border-emerald-800/60 hidden md:block">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <MapPin className="w-3.5 h-3.5 text-lime-400" />
+    <header className="sticky top-0 z-50 w-full">
+      {/* =====================================================
+          TOP CONTACT BAR
+      ====================================================== */}
+
+      <div className="hidden border-b border-emerald-800/60 bg-gradient-to-r from-emerald-950 via-emerald-900 to-green-950 text-[11px] text-emerald-100 lg:block">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-2">
+          <div className="flex min-w-0 items-center gap-5 2xl:gap-7">
+            <span className="inline-flex shrink-0 items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-lime-400" />
               <span>{SCHOOL_INFO.address}</span>
             </span>
-            <span className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <Phone className="w-3.5 h-3.5 text-lime-400" />
-              <a href={`tel:${SCHOOL_INFO.phone}`} className="font-semibold">{SCHOOL_INFO.phone}</a>
-            </span>
-            <span className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <Mail className="w-3.5 h-3.5 text-lime-400" />
-              <a href={`mailto:${SCHOOL_INFO.email}`}>{SCHOOL_INFO.email}</a>
-            </span>
+
+            <a
+              href={`tel:${SCHOOL_INFO.phone}`}
+              className="inline-flex shrink-0 items-center gap-1.5 transition hover:text-white"
+            >
+              <Phone className="h-3.5 w-3.5 text-lime-400" />
+              {SCHOOL_INFO.phone}
+            </a>
+
+            {SCHOOL_INFO.email && (
+              <a
+                href={`mailto:${SCHOOL_INFO.email}`}
+                className="inline-flex min-w-0 items-center gap-1.5 transition hover:text-white"
+              >
+                <Mail className="h-3.5 w-3.5 shrink-0 text-lime-400" />
+                <span className="truncate">{SCHOOL_INFO.email}</span>
+              </a>
+            )}
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-emerald-300 flex items-center gap-1">
-              <Clock className="w-3 h-3 text-lime-400" /> {SCHOOL_INFO.officeHours}
-            </span>
-            <span className="h-3 w-px bg-emerald-800" />
+          <div className="flex shrink-0 items-center gap-4">
+            {SCHOOL_INFO.officeHours && (
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-emerald-200">
+                <Clock className="h-3.5 w-3.5 text-lime-400" />
+                {SCHOOL_INFO.officeHours}
+              </span>
+            )}
+
+            <span className="h-4 w-px bg-emerald-700" />
+
             <button
-              onClick={onOpenDeveloper}
-              className="text-lime-300 hover:text-lime-200 font-bold flex items-center gap-1 underline underline-offset-2 transition-colors cursor-pointer"
+              type="button"
+              onClick={handleDeveloperClick}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap font-bold text-lime-300 transition hover:text-lime-200"
             >
-              <Code2 className="w-3.5 h-3.5" /> Dev: Bibash Lamichhane
+              <Code2 className="h-3.5 w-3.5" />
+              Dev: Bibash Lamichhane
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Glassmorphic Navigation Bar */}
-      <div className={`transition-all duration-300 ${
-        scrolled 
-          ? "bg-white/95 backdrop-blur-md shadow-lg shadow-emerald-950/5 border-b border-emerald-100 py-2.5" 
-          : "bg-white/90 backdrop-blur-sm border-b border-emerald-100/60 py-3.5"
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
-          {/* Brand & Logo */}
-          <a href="#home" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-800 to-green-600 flex items-center justify-center text-white shadow-md shadow-emerald-900/20 group-hover:scale-105 transition-transform">
-              <Leaf className="w-6 h-6 text-lime-300 group-hover:rotate-12 transition-transform" />
+      {/* =====================================================
+          MAIN NAVIGATION
+      ====================================================== */}
+
+      <div
+        className={`border-b border-emerald-100/80 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/95 py-2 shadow-lg shadow-emerald-950/5 backdrop-blur-2xl"
+            : "bg-white/90 py-3 backdrop-blur-xl"
+        }`}
+      >
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3 px-3 sm:px-5 lg:gap-4 lg:px-6 2xl:px-8">
+          {/* LOGO AND SCHOOL NAME */}
+
+          <a
+            href="#home"
+            onClick={closeMenu}
+            className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3 xl:flex-none"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-800 to-green-600 text-white shadow-md shadow-emerald-900/15 transition-transform hover:scale-105 sm:h-11 sm:w-11 sm:rounded-2xl">
+              <Leaf className="h-5 w-5 text-lime-300 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-emerald-950 text-base sm:text-lg tracking-tight leading-none group-hover:text-emerald-700 transition-colors">
+
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate text-sm font-black leading-tight tracking-tight text-emerald-950 sm:text-base lg:text-lg">
                   {SCHOOL_INFO.name}
                 </span>
-                <span className="hidden lg:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+
+                <span className="hidden 2xl:inline-flex shrink-0 items-center rounded-full bg-emerald-100 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-emerald-800">
                   Govt. Technical
                 </span>
               </div>
-              <div className="text-xs font-semibold text-emerald-700 tracking-wide mt-0.5 flex items-center gap-1">
-                <span>{SCHOOL_INFO.department}</span>
-                <span className="text-gray-400">·</span>
-                <span className="text-gray-500 font-normal">{SCHOOL_INFO.locationShort}</span>
+
+              <div className="mt-1 flex min-w-0 items-center gap-1 text-[10px] font-medium leading-tight text-emerald-700 sm:text-xs">
+                <span className="truncate">{SCHOOL_INFO.department}</span>
+                <span className="shrink-0 text-slate-400">·</span>
+                <span className="truncate text-slate-500">
+                  {SCHOOL_INFO.locationShort}
+                </span>
               </div>
             </div>
           </a>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1 text-[13px] font-bold text-gray-700">
+          {/* DESKTOP NAVIGATION */}
+
+          <nav
+            aria-label="Main navigation"
+            className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex 2xl:gap-1"
+          >
             {navLinks.map((link) => {
               if (link.isClassMenu) {
                 return (
-                  <div key={link.label} className="relative group">
+                  <div key={link.label} className="group relative shrink-0">
                     <button
-                      onClick={() => setClassDropdownOpen(!classDropdownOpen)}
-                      className="px-3.5 py-2 rounded-xl hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors flex items-center gap-1"
+                      type="button"
+                      onClick={() =>
+                        setClassDropdownOpen((previous) => !previous)
+                      }
+                      aria-expanded={classDropdownOpen}
+                      className={`${desktopLinkClass} gap-1`}
                     >
-                      <span>Class (9–12)</span>
-                      <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" />
+                      Classes (9–12)
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform ${
+                          classDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
                     </button>
 
-                    {/* Dropdown Menu */}
-                    <div className="absolute top-full left-0 w-56 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200">
-                      <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-emerald-100 p-2 space-y-1">
-                        {["9", "10", "11", "12"].map((grade) => (
+                    <div
+                      className={`absolute left-0 top-full z-50 w-60 pt-3 transition-all duration-200 ${
+                        classDropdownOpen
+                          ? "visible translate-y-0 opacity-100"
+                          : "invisible -translate-y-1 opacity-0 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                      }`}
+                    >
+                      <div className="rounded-2xl border border-emerald-100 bg-white/95 p-2 shadow-xl shadow-emerald-950/10 backdrop-blur-2xl">
+                        {grades.map((grade) => (
                           <button
                             key={grade}
+                            type="button"
                             onClick={() => handleClassClick(grade)}
-                            className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-between transition-colors"
+                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800"
                           >
-                            <span className="flex items-center gap-2">
-                              <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                            <span className="flex min-w-0 items-center gap-2.5">
+                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
                                 {grade}
                               </span>
-                              <span>Class {grade} Plant Science</span>
+                              <span className="truncate">
+                                Class {grade} Plant Science
+                              </span>
                             </span>
-                            <ArrowRight className="w-3 h-3 text-emerald-600" />
+
+                            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
                           </button>
                         ))}
                       </div>
@@ -148,7 +263,7 @@ export default function Navbar({ onOpenDeveloper, onSelectGrade }) {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="px-3.5 py-2 rounded-xl hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors"
+                  className={desktopLinkClass}
                 >
                   {link.label}
                 </a>
@@ -156,105 +271,181 @@ export default function Navbar({ onOpenDeveloper, onSelectGrade }) {
             })}
           </nav>
 
-          {/* Right Action CTA */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* DESKTOP ACTION BUTTONS */}
+
+          <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-2.5">
             <a
               href="#notices"
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-200/60 transition-colors flex items-center gap-1.5"
+              className={`${actionButtonClass} border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100`}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <span>Latest Notices</span>
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600" />
+              </span>
+              Latest Notices
             </a>
+
             <a
               href="#contact"
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-800 to-green-700 hover:from-emerald-700 hover:to-green-600 text-white shadow-md shadow-emerald-900/15 hover:shadow-lg transition-all flex items-center gap-1.5"
+              className={`${actionButtonClass} bg-gradient-to-r from-emerald-800 to-green-700 text-white shadow-md shadow-emerald-900/10 hover:-translate-y-0.5 hover:from-emerald-700 hover:to-green-600`}
             >
-              <span>Admission Inquiry</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              Admission Inquiry
+              <ArrowRight className="h-3.5 w-3.5 shrink-0" />
             </a>
           </div>
 
-          {/* Mobile Hamburger Button */}
-          <div className="flex items-center gap-2 xl:hidden">
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 transition-colors"
-              aria-label="Open mobile navigation menu"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
-          </div>
+          {/* MOBILE MENU BUTTON */}
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-900 transition hover:bg-emerald-100 xl:hidden"
+            aria-label="Open mobile navigation menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
-      {/* Dynamic Mobile Drawer Navigation Menu */}
+      {/* =====================================================
+          MOBILE DRAWER
+      ====================================================== */}
+
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 xl:hidden flex">
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-emerald-950/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
+        <div className="fixed inset-0 z-[100] xl:hidden">
+          {/* BACKDROP */}
+
+          <button
+            type="button"
+            className="absolute inset-0 h-full w-full cursor-default bg-emerald-950/60 backdrop-blur-sm"
+            onClick={closeMenu}
+            aria-label="Close navigation menu"
           />
 
-          {/* Drawer Sidebar */}
-          <div className="relative ml-auto w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 overflow-y-auto">
-            {/* Drawer Header */}
-            <div className="p-5 bg-gradient-to-r from-emerald-950 to-green-900 text-white flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-lime-400 text-emerald-950 flex items-center justify-center font-bold">
-                  <Leaf className="w-5 h-5" />
+          {/* DRAWER PANEL */}
+
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
+            className="absolute right-0 top-0 flex h-[100dvh] w-[min(88vw,380px)] flex-col overflow-hidden border-l border-white/60 bg-white shadow-2xl"
+          >
+            {/* DRAWER HEADER */}
+
+            <div className="flex shrink-0 items-center justify-between gap-3 bg-gradient-to-r from-emerald-950 to-green-900 p-4 text-white sm:p-5">
+              <a
+                href="#home"
+                onClick={closeMenu}
+                className="flex min-w-0 items-center gap-3"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-lime-400 text-emerald-950">
+                  <Leaf className="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-white leading-tight">
+
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-black leading-tight">
                     {SCHOOL_INFO.name}
                   </h3>
-                  <p className="text-[11px] text-lime-300">
+                  <p className="mt-1 truncate text-[11px] text-lime-300">
                     {SCHOOL_INFO.department}
                   </p>
                 </div>
-              </div>
+              </a>
+
               <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                type="button"
+                onClick={closeMenu}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
                 aria-label="Close menu"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Quick Contact Header in Drawer */}
-            <div className="p-3 bg-emerald-50 border-b border-emerald-100 text-xs text-emerald-900 flex flex-col gap-1">
-              <span className="flex items-center gap-1 font-medium">
-                <MapPin className="w-3.5 h-3.5 text-emerald-700" /> {SCHOOL_INFO.address}
-              </span>
-              <span className="flex items-center gap-1 font-semibold">
-                <Phone className="w-3.5 h-3.5 text-emerald-700" /> {SCHOOL_INFO.phone}
-              </span>
+            {/* CONTACT DETAILS */}
+
+            <div className="shrink-0 space-y-2 border-b border-emerald-100 bg-emerald-50/80 px-4 py-3 text-xs text-emerald-900">
+              {SCHOOL_INFO.address && (
+                <div className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                  <span className="min-w-0 break-words">
+                    {SCHOOL_INFO.address}
+                  </span>
+                </div>
+              )}
+
+              {SCHOOL_INFO.phone && (
+                <a
+                  href={`tel:${SCHOOL_INFO.phone}`}
+                  className="flex items-center gap-2 font-semibold"
+                >
+                  <Phone className="h-4 w-4 shrink-0 text-emerald-700" />
+                  <span>{SCHOOL_INFO.phone}</span>
+                </a>
+              )}
+
+              {SCHOOL_INFO.email && (
+                <a
+                  href={`mailto:${SCHOOL_INFO.email}`}
+                  className="flex min-w-0 items-center gap-2"
+                >
+                  <Mail className="h-4 w-4 shrink-0 text-emerald-700" />
+                  <span className="truncate">{SCHOOL_INFO.email}</span>
+                </a>
+              )}
             </div>
 
-            {/* Drawer Navigation Links */}
-            <div className="flex-1 p-5 space-y-1">
+            {/* SCROLLABLE NAVIGATION LINKS */}
+
+            <nav
+              aria-label="Mobile navigation"
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4"
+            >
               {navLinks.map((link) => {
                 if (link.isClassMenu) {
                   return (
-                    <div key={link.label} className="py-2 border-y border-gray-100 my-2">
-                      <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-2 px-3">
-                        Plant Science Classes
-                      </div>
-                      <div className="grid grid-cols-2 gap-1.5 px-1">
-                        {["9", "10", "11", "12"].map((grade) => (
-                          <button
-                            key={grade}
-                            onClick={() => handleClassClick(grade)}
-                            className="p-2.5 rounded-xl bg-emerald-50/70 hover:bg-emerald-100 text-emerald-900 text-xs font-bold flex items-center justify-center gap-2 transition-colors border border-emerald-100"
-                          >
-                            <span className="w-5 h-5 rounded-md bg-emerald-700 text-white flex items-center justify-center text-[10px]">
-                              {grade}
-                            </span>
-                            <span>Class {grade}</span>
-                          </button>
-                        ))}
-                      </div>
+                    <div
+                      key={link.label}
+                      className="my-2 border-y border-slate-100 py-3"
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setClassDropdownOpen((previous) => !previous)
+                        }
+                        aria-expanded={classDropdownOpen}
+                        className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-bold text-emerald-900 transition hover:bg-emerald-50"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <GraduationCap className="h-4 w-4 shrink-0 text-emerald-700" />
+                          Plant Science Classes
+                        </span>
+
+                        <ChevronDown
+                          className={`h-4 w-4 shrink-0 transition-transform ${
+                            classDropdownOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {classDropdownOpen && (
+                        <div className="mt-2 grid grid-cols-2 gap-2 px-1">
+                          {grades.map((grade) => (
+                            <button
+                              key={grade}
+                              type="button"
+                              onClick={() => handleClassClick(grade)}
+                              className="flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-emerald-100 bg-emerald-50 px-2 py-2 text-xs font-bold text-emerald-900 transition hover:bg-emerald-100"
+                            >
+                              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-800 text-[10px] text-white">
+                                {grade}
+                              </span>
+                              Class {grade}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 }
@@ -263,38 +454,38 @@ export default function Navbar({ onOpenDeveloper, onSelectGrade }) {
                   <a
                     key={link.label}
                     href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:text-emerald-800 hover:bg-emerald-50 transition-colors"
+                    onClick={closeMenu}
+                    className="flex min-h-11 items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800"
                   >
-                    {link.label}
+                    <span>{link.label}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-emerald-600" />
                   </a>
                 );
               })}
-            </div>
+            </nav>
 
-            {/* Drawer Footer Actions */}
-            <div className="p-5 border-t border-gray-200 bg-gray-50 space-y-2.5">
+            {/* DRAWER FOOTER BUTTONS */}
+
+            <div className="shrink-0 space-y-2 border-t border-slate-200 bg-slate-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <a
                 href="#contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-3 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-colors"
+                onClick={closeMenu}
+                className="flex min-h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-emerald-800 to-green-700 px-3 py-3 text-xs font-bold text-white shadow-md transition hover:from-emerald-700 hover:to-green-600"
               >
-                <span>Get in Touch / Admissions</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                Get in Touch / Admissions
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </a>
 
               <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenDeveloper();
-                }}
-                className="w-full py-2.5 rounded-xl bg-lime-400 hover:bg-lime-300 text-emerald-950 text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                type="button"
+                onClick={handleDeveloperClick}
+                className="flex min-h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-lime-300 px-3 py-3 text-xs font-bold text-emerald-950 transition hover:bg-lime-200"
               >
-                <Code2 className="w-4 h-4" />
-                <span>Dev: Bibash Lamichhane Profile</span>
+                <Code2 className="h-4 w-4 shrink-0" />
+                Bibash Lamichhane
               </button>
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </header>
