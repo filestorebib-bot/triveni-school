@@ -1,528 +1,960 @@
+
 import React, { useState, useEffect } from "react";
-import { 
-  Sprout, GraduationCap, ChevronLeft, ChevronRight, Phone, Mail, 
-  MapPin, ArrowRight, Wheat, Flower2, Microscope, Layers, Tractor, 
-  Briefcase, Quote, Users, Search, CheckCircle2, Award, Sparkles,
-  ExternalLink, Calendar, BookOpen
+import {
+  Sprout,
+  GraduationCap,
+  ChevronLeft,
+  ChevronRight,
+  Phone,
+  Mail,
+  ArrowRight,
+  Wheat,
+  Flower2,
+  Microscope,
+  Layers,
+  Tractor,
+  Briefcase,
+  Quote,
+  Search,
+  Award,
+  Sparkles,
+  ExternalLink,
+  BookOpen,
 } from "lucide-react";
-import { 
-  SCHOOL_INFO, HERO_CAROUSEL_IMAGES, CORE_FOCUS_AREAS, 
-  ALUMNI_TESTIMONIALS, TEACHERS_LIST 
+
+import {
+  SCHOOL_INFO,
+  HERO_CAROUSEL_IMAGES,
+  CORE_FOCUS_AREAS,
+  ALUMNI_TESTIMONIALS,
+  TEACHERS_LIST,
 } from "../data/schoolData";
 
-export default function HomeSection({ onOpenDeveloper, onSelectImage, onSelectNotice }) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [teacherSearch, setTeacherSearch] = useState("");
-  const [activeTeacherSubject, setActiveTeacherSubject] = useState("All");
+const GlassCard = ({ children, className = "" }) => (
+  <div
+    className={`rounded-3xl border border-white/70 bg-white/65
+      shadow-[0_8px_40px_rgba(15,80,45,0.08)]
+      backdrop-blur-2xl transition-all duration-300
+      hover:border-emerald-200 hover:shadow-[0_16px_50px_rgba(15,80,45,0.13)]
+      ${className}`}
+  >
+    {children}
+  </div>
+);
 
-  // Autoplay hero slider
+const SectionHeading = ({ eyebrow, title, description }) => (
+  <div className="mx-auto mb-10 max-w-3xl text-center">
+    <span className="inline-flex items-center gap-2 rounded-full border
+      border-emerald-200/80 bg-white/70 px-4 py-2 text-xs font-bold
+      uppercase tracking-[0.16em] text-emerald-800 shadow-sm backdrop-blur-xl">
+      <Sprout className="h-4 w-4" />
+      {eyebrow}
+    </span>
+
+    <h2 className="mt-5 text-3xl font-black tracking-tight text-emerald-950
+      sm:text-4xl lg:text-5xl">
+      {title}
+    </h2>
+
+    {description && (
+      <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+        {description}
+      </p>
+    )}
+  </div>
+);
+
+export default function HomeSection({
+  onOpenDeveloper,
+  onSelectImage,
+  onSelectNotice,
+}) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [teacherSearch, setTeacherSearch] = useState("");
+
+  const slides = HERO_CAROUSEL_IMAGES || [];
+
+  // Automatic slider: changes every 5 seconds, including when hovered.
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (slides.length < 2) return;
+
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % HERO_CAROUSEL_IMAGES.length);
-    }, 5500);
+      setCurrentSlide((previous) => (previous + 1) % slides.length);
+    }, 5000);
+
     return () => clearInterval(timer);
-  }, [isAutoPlaying]);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (currentSlide >= slides.length) {
+      setCurrentSlide(0);
+    }
+  }, [currentSlide, slides.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % HERO_CAROUSEL_IMAGES.length);
+    if (!slides.length) return;
+    setCurrentSlide((previous) => (previous + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + HERO_CAROUSEL_IMAGES.length) % HERO_CAROUSEL_IMAGES.length);
+    if (!slides.length) return;
+    setCurrentSlide(
+      (previous) => (previous - 1 + slides.length) % slides.length
+    );
   };
 
-  const filteredTeachers = TEACHERS_LIST.filter((t) => {
-    const matchesSearch = 
-      t.name.toLowerCase().includes(teacherSearch.toLowerCase()) ||
-      t.subject.toLowerCase().includes(teacherSearch.toLowerCase()) ||
-      t.role.toLowerCase().includes(teacherSearch.toLowerCase());
-    
-    if (activeTeacherSubject === "All") return matchesSearch;
-    return matchesSearch && t.subject.toLowerCase().includes(activeTeacherSubject.toLowerCase());
+  const filteredTeachers = (TEACHERS_LIST || []).filter((teacher) => {
+    const search = teacherSearch.toLowerCase();
+
+    return (
+      (teacher.name || "").toLowerCase().includes(search) ||
+      (teacher.subject || "").toLowerCase().includes(search) ||
+      (teacher.role || "").toLowerCase().includes(search)
+    );
   });
 
+  const focusIcons = [
+    Wheat,
+    Flower2,
+    Microscope,
+    Layers,
+    Tractor,
+    Briefcase,
+  ];
+
+  const leadership = [
+    {
+      key: "coordinator",
+      label: "Department Coordinator",
+      data: SCHOOL_INFO.coordinator,
+      accent: "emerald",
+    },
+    {
+      key: "principal",
+      label: "School Principal",
+      data: SCHOOL_INFO.principal,
+      accent: "lime",
+    },
+  ];
+
   return (
-    <section id="home" className="relative pt-6 sm:pt-8 pb-16 space-y-16">
-      {/* SECTION HEADER / MOTTO */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-3xl mx-auto mb-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200/80 mb-3">
-            <Sprout className="w-4 h-4 text-emerald-700" />
-            <span>Government Technical Vocational Stream · Grades 9–12</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-950 tracking-tight leading-tight">
-            Cultivating Scientific Minds for{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-700 via-green-600 to-lime-600">
-              Sustainable Agriculture
-            </span>
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed">
-            Welcome to Triveni Secondary School, Department of Plant Science, Katari-4, Udayapur. 
-            Blending academic rigor with high-tech greenhouse trials, soil diagnostics, and mandatory OJT internships.
-          </p>
-        </div>
-
-        {/* 1. HERO LEADERSHIP & INTERACTIVE CAROUSEL GRID */}
-        {/* Left: Coordinator | Middle: Image Carousel | Right: Principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          
-          {/* LEFT CARD: COORDINATOR DETAILS */}
-          <div className="lg:col-span-3 flex flex-col">
-            <div className="h-full glass-panel rounded-3xl p-5 sm:p-6 border border-emerald-100 shadow-xl flex flex-col justify-between glass-card-hover relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
-                    Coordinator's Desk
-                  </span>
-                  <Sprout className="w-4 h-4 text-emerald-600" />
-                </div>
-
-                {/* Coordinator Photo & Identity */}
-                <div className="text-center mt-2 mb-4">
-                  <div className="relative inline-block mx-auto mb-3">
-                    <img
-                      src={SCHOOL_INFO.coordinator.photo}
-                      alt={SCHOOL_INFO.coordinator.name}
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover mx-auto border-3 border-emerald-600 shadow-md group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute -bottom-2 -right-2 bg-emerald-700 text-white p-1 rounded-lg shadow">
-                      <GraduationCap className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                  <h3 className="text-base font-bold text-emerald-950">
-                    {SCHOOL_INFO.coordinator.name}
-                  </h3>
-                  <p className="text-xs font-semibold text-emerald-700 mt-0.5">
-                    {SCHOOL_INFO.coordinator.designation}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
-                    {SCHOOL_INFO.coordinator.qualification}
-                  </p>
-                </div>
-
-                {/* Message Quote */}
-                <div className="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-100/80 text-xs text-gray-700 italic leading-relaxed relative">
-                  <Quote className="w-4 h-4 text-emerald-300 absolute -top-1.5 -left-1.5" />
-                  "{SCHOOL_INFO.coordinator.message}"
-                </div>
-              </div>
-
-              {/* Contact info & Action */}
-              <div className="pt-4 mt-4 border-t border-gray-100 space-y-2 text-xs">
-                <a 
-                  href={`tel:${SCHOOL_INFO.coordinator.phone}`}
-                  className="flex items-center gap-2 text-gray-600 hover:text-emerald-800 transition-colors"
-                >
-                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{SCHOOL_INFO.coordinator.phone}</span>
-                </a>
-                <a 
-                  href={`mailto:${SCHOOL_INFO.coordinator.email}`}
-                  className="flex items-center gap-2 text-gray-600 hover:text-emerald-800 transition-colors truncate"
-                >
-                  <Mail className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="truncate">{SCHOOL_INFO.coordinator.email}</span>
-                </a>
-                <a
-                  href="#contact"
-                  className="mt-2 w-full py-2 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-center block transition-colors text-[11px]"
-                >
-                  Contact Coordinator
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* MIDDLE: INTERACTIVE IMAGE CAROUSEL / SLIDER */}
-          <div 
-            className="lg:col-span-6 flex flex-col"
-            onMouseEnter={() => setIsAutoPlaying(false)}
-            onMouseLeave={() => setIsAutoPlaying(true)}
-          >
-            <div className="h-full rounded-3xl overflow-hidden shadow-2xl border border-emerald-200/80 bg-emerald-950 relative flex flex-col group min-h-[380px] sm:min-h-[460px]">
-              {/* Image Slides */}
-              {HERO_CAROUSEL_IMAGES.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                    currentSlide === idx ? "opacity-100 z-10" : "opacity-0 z-0"
-                  }`}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Subtle Gradient Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-950/40 to-black/20" />
-                </div>
-              ))}
-
-              {/* Slider Content Overlay */}
-              <div className="relative z-20 mt-auto p-6 sm:p-8 text-white space-y-3">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-lime-400 text-emerald-950 shadow-md">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{HERO_CAROUSEL_IMAGES[currentSlide].badge}</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight drop-shadow-md">
-                  {HERO_CAROUSEL_IMAGES[currentSlide].title}
-                </h2>
-                <p className="text-xs sm:text-sm text-emerald-100 max-w-xl leading-relaxed drop-shadow">
-                  {HERO_CAROUSEL_IMAGES[currentSlide].subtitle}
-                </p>
-
-                {/* Quick Action row inside slider */}
-                <div className="pt-2 flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => onSelectImage && onSelectImage(HERO_CAROUSEL_IMAGES[currentSlide])}
-                    className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-white/20"
-                  >
-                    <span>View Fullscreen</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                  <a
-                    href="#program"
-                    className="px-4 py-2 rounded-xl bg-lime-400 hover:bg-lime-300 text-emerald-950 text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
-                  >
-                    <span>Explore Grades 9–12</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Slider Arrows Controls */}
-              <button
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md transition-all group-hover:scale-110"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md transition-all group-hover:scale-110"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-
-              {/* Slider Dot Indicators */}
-              <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-md">
-                {HERO_CAROUSEL_IMAGES.map((_, dotIdx) => (
-                  <button
-                    key={dotIdx}
-                    onClick={() => setCurrentSlide(dotIdx)}
-                    className={`h-2 rounded-full transition-all ${
-                      currentSlide === dotIdx ? "w-6 bg-lime-400" : "w-2 bg-white/50"
-                    }`}
-                    aria-label={`Go to slide ${dotIdx + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT CARD: PRINCIPAL DETAILS */}
-          <div className="lg:col-span-3 flex flex-col">
-            <div className="h-full glass-panel rounded-3xl p-5 sm:p-6 border border-emerald-100 shadow-xl flex flex-col justify-between glass-card-hover relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-32 h-32 bg-lime-400/10 rounded-full blur-2xl pointer-events-none" />
-
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-lime-100 text-emerald-900">
-                    Principal's Message
-                  </span>
-                  <Award className="w-4 h-4 text-emerald-700" />
-                </div>
-
-                {/* Principal Photo & Identity */}
-                <div className="text-center mt-2 mb-4">
-                  <div className="relative inline-block mx-auto mb-3">
-                    <img
-                      src={SCHOOL_INFO.principal.photo}
-                      alt={SCHOOL_INFO.principal.name}
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover mx-auto border-3 border-green-700 shadow-md group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute -bottom-2 -right-2 bg-green-800 text-white p-1 rounded-lg shadow">
-                      <GraduationCap className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                  <h3 className="text-base font-bold text-emerald-950">
-                    {SCHOOL_INFO.principal.name}
-                  </h3>
-                  <p className="text-xs font-semibold text-emerald-700 mt-0.5">
-                    {SCHOOL_INFO.principal.designation}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
-                    {SCHOOL_INFO.principal.qualification}
-                  </p>
-                </div>
-
-                {/* Message Quote */}
-                <div className="bg-lime-50/70 p-3.5 rounded-2xl border border-lime-200/80 text-xs text-gray-700 italic leading-relaxed relative">
-                  <Quote className="w-4 h-4 text-lime-400 absolute -top-1.5 -left-1.5" />
-                  "{SCHOOL_INFO.principal.message}"
-                </div>
-              </div>
-
-              {/* Contact info & Action */}
-              <div className="pt-4 mt-4 border-t border-gray-100 space-y-2 text-xs">
-                <a 
-                  href={`tel:${SCHOOL_INFO.principal.phone}`}
-                  className="flex items-center gap-2 text-gray-600 hover:text-emerald-800 transition-colors"
-                >
-                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{SCHOOL_INFO.principal.phone}</span>
-                </a>
-                <a 
-                  href={`mailto:${SCHOOL_INFO.principal.email}`}
-                  className="flex items-center gap-2 text-gray-600 hover:text-emerald-800 transition-colors truncate"
-                >
-                  <Mail className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="truncate">{SCHOOL_INFO.principal.email}</span>
-                </a>
-                <a
-                  href="#about"
-                  className="mt-2 w-full py-2 rounded-xl bg-green-800 hover:bg-green-700 text-white font-bold text-center block transition-colors text-[11px]"
-                >
-                  About School Heritage
-                </a>
-              </div>
-            </div>
-          </div>
-
-        </div>
+    <main
+      id="home"
+      className="relative isolate overflow-hidden bg-[#f5faf6] text-slate-800"
+    >
+      {/* BACKGROUND DECORATION */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-40 top-40 h-96 w-96 rounded-full
+          bg-emerald-300/20 blur-[110px]" />
+        <div className="absolute -right-40 top-[850px] h-96 w-96 rounded-full
+          bg-lime-300/20 blur-[110px]" />
+        <div className="absolute left-1/3 top-[1700px] h-96 w-96 rounded-full
+          bg-teal-200/20 blur-[110px]" />
+        <div className="absolute inset-0 opacity-[0.18]"
+          style={{
+            backgroundImage:
+              "radial-gradient(#86a891 0.7px, transparent 0.7px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
       </div>
 
-      {/* 2. COURSE DETAILS CARD & CORE AGRICULTURAL FOCUS AREAS */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-emerald-100 shadow-xl relative overflow-hidden">
-          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-8">
-            <div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
-                Technical Plant Science Stream · NEB Curriculum
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 mt-2">
-                Core Focus Areas & Applied Science Disciplines
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600 max-w-2xl mt-1">
-                Triveni's curriculum adheres to the National Curriculum Framework (NCF) of Nepal, 
-                blending theoretical botanical foundations with applied agricultural engineering.
-              </p>
+      {/* =====================================================
+          1. FULL-WIDTH AUTOMATIC HERO SLIDER
+      ====================================================== */}
+      <section className="relative px-3 pb-10 pt-4 sm:px-5 sm:pt-6 lg:px-8">
+        <div className="relative mx-auto max-w-[1600px]">
+          <div className="group relative min-h-[540px] overflow-hidden rounded-[28px]
+            border border-white/60 bg-emerald-950 shadow-[0_25px_80px_rgba(6,55,30,0.20)]
+            sm:min-h-[600px] sm:rounded-[36px] lg:min-h-[680px]">
+
+            {/* Slides */}
+            {slides.length > 0 ? (
+              slides.map((slide, index) => (
+                <div
+                  key={`${slide.url}-${index}`}
+                  className={`absolute inset-0 transition-opacity duration-1000
+                    ease-in-out ${
+                      currentSlide === index
+                        ? "z-10 opacity-100"
+                        : "z-0 opacity-0"
+                    }`}
+                  aria-hidden={currentSlide !== index}
+                >
+                  <img
+                    src={slide.url}
+                    alt={slide.title || "Triveni Secondary School"}
+                    className={`h-full w-full object-cover transition-transform
+                      duration-[7000ms] ease-out ${
+                        currentSlide === index
+                          ? "scale-105"
+                          : "scale-100"
+                      }`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-r
+                    from-[#062d1c]/90 via-[#062d1c]/55 to-[#062d1c]/10" />
+
+                  <div className="absolute inset-0 bg-gradient-to-t
+                    from-[#062d1c]/70 via-transparent to-black/10" />
+                </div>
+              ))
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br
+                from-emerald-950 via-emerald-800 to-green-600" />
+            )}
+
+            {/* Decorative glass circles */}
+            <div className="pointer-events-none absolute -right-20 -top-20
+              z-10 h-80 w-80 rounded-full border border-white/10
+              bg-white/5 backdrop-blur-sm" />
+
+            <div className="pointer-events-none absolute -bottom-36 right-1/4
+              z-10 h-96 w-96 rounded-full border border-white/10
+              bg-white/5 backdrop-blur-sm" />
+
+            {/* Hero content */}
+            <div className="relative z-20 flex min-h-[540px] flex-col
+              justify-center px-7 py-20 sm:min-h-[600px] sm:px-14
+              lg:min-h-[680px] lg:px-20">
+
+              <div className="max-w-4xl">
+                <div className="mb-7 inline-flex items-center gap-2 rounded-full
+                  border border-white/25 bg-white/10 px-4 py-2
+                  text-xs font-semibold tracking-wide text-white
+                  shadow-lg backdrop-blur-xl sm:text-sm">
+                  <span className="flex h-2 w-2 rounded-full bg-lime-300
+                    shadow-[0_0_12px_rgba(190,242,100,0.9)]" />
+                  <Sprout className="h-4 w-4 text-lime-300" />
+                  Government Technical Vocational Stream · Grades 9–12
+                </div>
+
+                <p className="mb-4 text-sm font-semibold uppercase
+                  tracking-[0.22em] text-lime-200 sm:text-base">
+                  Triveni Secondary School
+                </p>
+
+                <h1 className="max-w-4xl text-4xl font-black leading-[1.08]
+                  tracking-tight text-white sm:text-5xl md:text-6xl
+                  lg:text-7xl">
+                  Cultivating Minds.
+                  <span className="mt-2 block text-lime-300">
+                    Growing the Future.
+                  </span>
+                </h1>
+
+                <p className="mt-7 max-w-2xl text-sm leading-7 text-white/85
+                  sm:text-base sm:leading-8 lg:text-lg">
+                  Discover quality education, practical agricultural training,
+                  and the knowledge to build a more sustainable future through
+                  the Department of Plant Science.
+                </p>
+
+                <div className="mt-9 flex flex-wrap gap-3">
+                  <a
+                    href="#program"
+                    className="inline-flex items-center gap-2 rounded-2xl
+                      bg-lime-300 px-6 py-3.5 text-sm font-bold text-emerald-950
+                      shadow-[0_8px_25px_rgba(190,242,100,0.20)]
+                      transition hover:-translate-y-1 hover:bg-lime-200"
+                  >
+                    Explore Our Programs
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+
+                  <a
+                    href="#about"
+                    className="inline-flex items-center gap-2 rounded-2xl
+                      border border-white/30 bg-white/10 px-6 py-3.5
+                      text-sm font-bold text-white backdrop-blur-xl
+                      transition hover:bg-white/20"
+                  >
+                    Discover Our School
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+
+                  {slides.length > 0 && onSelectImage && (
+                    <button
+                      type="button"
+                      onClick={() => onSelectImage(slides[currentSlide])}
+                      className="inline-flex items-center gap-2 rounded-2xl
+                        border border-white/20 bg-black/15 px-5 py-3.5
+                        text-sm font-semibold text-white backdrop-blur-xl
+                        transition hover:bg-white/15"
+                    >
+                      View Image
+                      <ExternalLink className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Trust indicators */}
+                <div className="mt-12 flex flex-wrap gap-x-7 gap-y-4
+                  border-t border-white/20 pt-6 text-xs text-white/85 sm:text-sm">
+                  <span className="flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5 text-lime-300" />
+                    Technical Education
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Sprout className="h-5 w-5 text-lime-300" />
+                    Practical Learning
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-lime-300" />
+                    Future-Ready Skills
+                  </span>
+                </div>
+              </div>
             </div>
+
+            {/* Previous and next buttons */}
+            {slides.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={prevSlide}
+                  aria-label="Previous slide"
+                  className="absolute left-4 top-1/2 z-30 flex h-11 w-11
+                    -translate-y-1/2 items-center justify-center rounded-full
+                    border border-white/30 bg-white/15 text-white
+                    shadow-lg backdrop-blur-xl transition hover:scale-110
+                    hover:bg-white/30 sm:left-7 sm:h-14 sm:w-14"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={nextSlide}
+                  aria-label="Next slide"
+                  className="absolute right-4 top-1/2 z-30 flex h-11 w-11
+                    -translate-y-1/2 items-center justify-center rounded-full
+                    border border-white/30 bg-white/15 text-white
+                    shadow-lg backdrop-blur-xl transition hover:scale-110
+                    hover:bg-white/30 sm:right-7 sm:h-14 sm:w-14"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+
+                {/* Slide indicators */}
+                <div className="absolute bottom-5 right-5 z-30 flex items-center
+                  gap-2 rounded-full border border-white/20 bg-black/20
+                  px-3 py-2 backdrop-blur-xl sm:bottom-8 sm:right-10">
+                  {slides.map((slide, index) => (
+                    <button
+                      key={`${slide.url}-dot-${index}`}
+                      type="button"
+                      onClick={() => setCurrentSlide(index)}
+                      aria-label={`Show slide ${index + 1}`}
+                      aria-current={currentSlide === index ? "true" : undefined}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${
+                        currentSlide === index
+                          ? "w-8 bg-lime-300"
+                          : "w-2.5 bg-white/60 hover:bg-white"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Slide number */}
+                <div className="absolute bottom-7 left-7 z-30 hidden
+                  font-mono text-xs tracking-widest text-white/80 sm:block">
+                  {String(currentSlide + 1).padStart(2, "0")}
+                  <span className="mx-2 text-white/40">/</span>
+                  {String(slides.length).padStart(2, "0")}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          2. WELCOME SECTION
+      ====================================================== */}
+      <section id="about" className="px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full
+              border border-emerald-200 bg-white/70 px-4 py-2 text-xs
+              font-bold uppercase tracking-widest text-emerald-800 backdrop-blur-xl">
+              <Sparkles className="h-4 w-4" />
+              Welcome to Triveni
+            </span>
+
+            <h2 className="mt-6 text-3xl font-black leading-tight
+              tracking-tight text-emerald-950 sm:text-4xl lg:text-5xl">
+              Education That Connects
+              <span className="block text-emerald-700">
+                Knowledge With Practice.
+              </span>
+            </h2>
+
+            <p className="mt-6 text-sm leading-8 text-slate-600 sm:text-base">
+              Welcome to Triveni Secondary School, Department of Plant Science,
+              Katari-4, Udayapur, Nepal. Our technical education approach brings
+              classroom learning closer to practical agricultural knowledge
+              and real-world skills.
+            </p>
+
+            <p className="mt-4 text-sm leading-8 text-slate-600 sm:text-base">
+              Explore our academic programs, practical learning opportunities,
+              faculty, and activities designed to help students prepare for
+              their future.
+            </p>
+
             <a
-              href="#classes"
-              className="px-5 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all shrink-0"
+              href="#program"
+              className="mt-7 inline-flex items-center gap-2 rounded-xl
+                bg-emerald-800 px-5 py-3 text-sm font-bold text-white
+                shadow-lg shadow-emerald-900/10 transition hover:-translate-y-1
+                hover:bg-emerald-700"
             >
-              <span>Explore Subject Syllabus</span>
-              <ArrowRight className="w-4 h-4" />
+              Explore Plant Science
+              <ArrowRight className="h-4 w-4" />
             </a>
           </div>
 
-          {/* Grid of 6 Core Disciplines */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {CORE_FOCUS_AREAS.map((area, idx) => (
-              <div 
-                key={idx}
-                className="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:border-emerald-300 hover:shadow-lg transition-all glass-card-hover group"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:bg-lime-400 group-hover:text-emerald-950 transition-colors">
-                    {idx === 0 && <Wheat className="w-5 h-5" />}
-                    {idx === 1 && <Flower2 className="w-5 h-5" />}
-                    {idx === 2 && <Microscope className="w-5 h-5" />}
-                    {idx === 3 && <Layers className="w-5 h-5" />}
-                    {idx === 4 && <Tractor className="w-5 h-5" />}
-                    {idx === 5 && <Briefcase className="w-5 h-5" />}
-                  </div>
-                  <span className="font-mono text-[11px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
-                    {area.code}
-                  </span>
-                </div>
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-[32px]
+              bg-gradient-to-br from-emerald-200/60 to-lime-100/60 blur-2xl" />
 
-                <h3 className="text-base font-bold text-emerald-950 mb-1 group-hover:text-emerald-700 transition-colors">
-                  {area.title}
-                </h3>
-                <p className="text-xs text-gray-600 leading-relaxed mb-3">
-                  {area.description}
-                </p>
+            <GlassCard className="relative p-5 sm:p-8">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {[
+                  {
+                    icon: BookOpen,
+                    title: "Academic Learning",
+                    text: "Build a strong foundation through structured education.",
+                  },
+                  {
+                    icon: Sprout,
+                    title: "Practical Skills",
+                    text: "Connect theory with agricultural practice.",
+                  },
+                  {
+                    icon: Microscope,
+                    title: "Scientific Thinking",
+                    text: "Develop observation, investigation, and problem-solving.",
+                  },
+                  {
+                    icon: GraduationCap,
+                    title: "Career Preparation",
+                    text: "Explore pathways for further study and professional growth.",
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
 
-                {/* Practical Skill Tags */}
-                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-50">
-                  {area.skills.map((skill, sIdx) => (
-                    <span 
-                      key={sIdx}
-                      className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800"
+                  return (
+                    <div
+                      key={item.title}
+                      className="rounded-2xl border border-white/80
+                        bg-white/65 p-5 backdrop-blur-xl transition
+                        hover:-translate-y-1 hover:bg-white/90"
                     >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+                      <div className="mb-4 flex h-11 w-11 items-center
+                        justify-center rounded-2xl border border-emerald-100
+                        bg-emerald-50 text-emerald-800">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-bold text-emerald-950">
+                        {item.title}
+                      </h3>
+                      <p className="mt-2 text-xs leading-6 text-slate-600">
+                        {item.text}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
+            </GlassCard>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          3. LEADERSHIP: PRINCIPAL AND COORDINATOR BELOW HERO
+      ====================================================== */}
+      <section id="leadership" className="px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeading
+            eyebrow="Our Leadership"
+            title="Guided by Vision. Driven by Education."
+            description="Meet the people dedicated to supporting our students, strengthening our institution, and advancing quality technical education."
+          />
+
+          <div className="grid grid-cols-1 gap-7 lg:grid-cols-2 lg:gap-8">
+            {leadership.map(({ key, label, data, accent }) => (
+              <GlassCard key={key} className="group relative overflow-hidden p-5 sm:p-8">
+                <div className={`absolute -right-16 -top-16 h-52 w-52
+                  rounded-full blur-3xl ${
+                    accent === "lime"
+                      ? "bg-lime-300/25"
+                      : "bg-emerald-300/25"
+                  }`} />
+
+                <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start">
+                  <div className="shrink-0">
+                    <div className="relative mx-auto w-fit">
+                      <div className={`absolute -inset-2 rounded-[26px]
+                        blur-sm ${
+                          accent === "lime"
+                            ? "bg-lime-300/60"
+                            : "bg-emerald-300/60"
+                        }`} />
+
+                      {data.photo ? (
+                        <img
+                          src={data.photo}
+                          alt={data.name}
+                          loading="lazy"
+                          className="relative h-40 w-36 rounded-[22px]
+                            border-4 border-white object-cover shadow-xl
+                            transition duration-500 group-hover:scale-[1.03]
+                            sm:h-48 sm:w-40"
+                        />
+                      ) : (
+                        <div className="relative flex h-40 w-36 items-center
+                          justify-center rounded-[22px] border-4 border-white
+                          bg-emerald-100 text-emerald-800 shadow-xl sm:h-48 sm:w-40">
+                          <GraduationCap className="h-14 w-14" />
+                        </div>
+                      )}
+
+                      <div className="absolute -bottom-3 -right-3 flex h-11
+                        w-11 items-center justify-center rounded-2xl border-4
+                        border-white bg-emerald-800 text-white shadow-lg">
+                        <GraduationCap className="h-5 w-5" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <span className="inline-flex items-center gap-2 rounded-full
+                      border border-emerald-200 bg-white/80 px-3 py-1.5
+                      text-[10px] font-bold uppercase tracking-widest
+                      text-emerald-800 sm:text-xs">
+                      <Award className="h-3.5 w-3.5" />
+                      {label}
+                    </span>
+
+                    <h3 className="mt-4 text-xl font-black tracking-tight
+                      text-emerald-950 sm:text-2xl">
+                      {data.name}
+                    </h3>
+
+                    <p className="mt-1 text-sm font-semibold text-emerald-700">
+                      {data.designation}
+                    </p>
+
+                    {data.qualification && (
+                      <p className="mt-1 text-xs text-slate-500">
+                        {data.qualification}
+                      </p>
+                    )}
+
+                    {data.message && (
+                      <div className="relative mt-5 rounded-2xl border
+                        border-white/90 bg-white/65 p-4 backdrop-blur-xl">
+                        <Quote className="mb-2 h-5 w-5 text-emerald-500" />
+                        <p className="text-sm italic leading-7 text-slate-600">
+                          {data.message}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-5 space-y-3 border-t border-emerald-100 pt-4">
+                      {data.phone && (
+                        <a
+                          href={`tel:${data.phone}`}
+                          className="flex items-center gap-3 text-sm text-slate-600
+                            transition hover:text-emerald-800"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center
+                            justify-center rounded-xl border border-white
+                            bg-white/80 text-emerald-700 shadow-sm">
+                            <Phone className="h-4 w-4" />
+                          </span>
+                          <span className="break-all">{data.phone}</span>
+                        </a>
+                      )}
+
+                      {data.email && (
+                        <a
+                          href={`mailto:${data.email}`}
+                          className="flex items-center gap-3 text-sm text-slate-600
+                            transition hover:text-emerald-800"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center
+                            justify-center rounded-xl border border-white
+                            bg-white/80 text-emerald-700 shadow-sm">
+                            <Mail className="h-4 w-4" />
+                          </span>
+                          <span className="break-all">{data.email}</span>
+                        </a>
+                      )}
+
+                      <a
+                        href="#contact"
+                        className="inline-flex items-center gap-2 pt-2
+                          text-sm font-bold text-emerald-800 transition
+                          hover:gap-3 hover:text-emerald-600"
+                      >
+                        Get in touch
+                        <ArrowRight className="h-4 w-4" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 3. VOICE OF FORMER STUDENTS (ALUMNI TESTIMONIALS) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-lime-100 text-emerald-900">
-            Alumni Voices & Career Impact
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 mt-2">
-            Where Triveni Plant Science Leads Our Graduates
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">
-            Real stories from past students currently working across agricultural knowledge centers, 
-            universities, commercial ventures, and software technology.
-          </p>
-        </div>
+      {/* =====================================================
+          4. CORE FOCUS AREAS
+      ====================================================== */}
+      <section id="program" className="px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeading
+            eyebrow="Academic Excellence"
+            title="Explore Our Focus Areas"
+            description="Discover the disciplines and practical skills that connect Plant Science education with modern agricultural opportunities."
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {ALUMNI_TESTIMONIALS.map((alum) => (
-            <div
-              key={alum.id}
-              className="glass-panel rounded-3xl p-5 border border-emerald-100 shadow-md flex flex-col justify-between glass-card-hover relative group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Quote className="w-5 h-5 text-emerald-400" />
-                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
-                    {alum.batch}
-                  </span>
-                </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {(CORE_FOCUS_AREAS || []).map((area, index) => {
+              const Icon = focusIcons[index % focusIcons.length];
 
-                <p className="text-xs text-gray-700 italic leading-relaxed mb-4">
-                  "{alum.quote}"
-                </p>
-              </div>
+              return (
+                <GlassCard
+                  key={area.code || area.title}
+                  className="group p-6 sm:p-7"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-14 w-14 items-center justify-center
+                      rounded-2xl border border-emerald-100 bg-white/80
+                      text-emerald-800 shadow-sm transition duration-300
+                      group-hover:-translate-y-1 group-hover:bg-emerald-800
+                      group-hover:text-white">
+                      <Icon className="h-6 w-6" />
+                    </div>
 
-              <div className="pt-3 border-t border-gray-100 flex items-center gap-3">
-                <img
-                  src={alum.avatar}
-                  alt={alum.name}
-                  className="w-11 h-11 rounded-xl object-cover border-2 border-emerald-500 shadow-sm shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-emerald-950 truncate flex items-center gap-1">
-                    <span>{alum.name}</span>
-                    {alum.name.includes("Bibash") && (
-                      <button
-                        onClick={onOpenDeveloper}
-                        className="text-[9px] font-bold bg-lime-400 text-emerald-950 px-1.5 py-0.2 rounded hover:underline cursor-pointer"
-                        title="View Developer Profile"
+                    <span className="rounded-lg border border-emerald-100
+                      bg-white/70 px-3 py-1.5 font-mono text-xs
+                      font-bold text-emerald-800">
+                      {area.code}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-lg font-extrabold text-emerald-950
+                    transition group-hover:text-emerald-700">
+                    {area.title}
+                  </h3>
+
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    {area.description}
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap gap-2 border-t
+                    border-emerald-100/80 pt-4">
+                    {(area.skills || []).map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full border border-emerald-100
+                          bg-white/70 px-3 py-1.5 text-xs font-medium
+                          text-emerald-800"
                       >
-                        Dev
-                      </button>
-                    )}
+                        {skill}
+                      </span>
+                    ))}
                   </div>
-                  <div className="text-[11px] font-semibold text-emerald-700 truncate">
-                    {alum.currentRole}
-                  </div>
-                  <div className="text-[10px] text-gray-500 truncate">
-                    {alum.affiliation}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 4. TEACHER & STAFF DETAILS SECTION */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-emerald-100 shadow-xl">
-          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-6">
-            <div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
-                Department Faculty & Academic Staff
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 mt-2">
-                Learn from Dedicated Agricultural Educators
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600 max-w-2xl mt-1">
-                Our team consists of university graduates in Agronomy, Plant Pathology, Horticulture, 
-                Soil Science, and seasoned practical farm instructors.
-              </p>
-            </div>
-
-            {/* Teacher Search Input */}
-            <div className="w-full md:w-72 relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search teacher by name or subject..."
-                value={teacherSearch}
-                onChange={(e) => setTeacherSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-white border border-gray-200 focus:outline-none focus:border-emerald-600 shadow-sm"
-              />
-            </div>
+                </GlassCard>
+              );
+            })}
           </div>
+        </div>
+      </section>
 
-          {/* Teacher Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredTeachers.map((teacher) => (
-              <div
-                key={teacher.id}
-                className="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:border-emerald-200 hover:shadow-md transition-all flex flex-col justify-between"
+      {/* =====================================================
+          5. ALUMNI TESTIMONIALS
+      ====================================================== */}
+      <section id="alumni" className="px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeading
+            eyebrow="Alumni Stories"
+            title="Learning That Goes Beyond the Classroom"
+            description="Discover the experiences and journeys of former students as they pursue further education and professional opportunities."
+          />
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {(ALUMNI_TESTIMONIALS || []).map((alum) => (
+              <GlassCard
+                key={alum.id}
+                className="flex flex-col justify-between p-6"
               >
                 <div>
-                  <div className="flex items-start gap-4 mb-3">
-                    <img
-                      src={teacher.photo}
-                      alt={teacher.name}
-                      className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-600 shadow-sm shrink-0"
-                    />
-                    <div>
-                      <h3 className="text-sm font-bold text-emerald-950">
-                        {teacher.name}
+                  <div className="flex items-center justify-between">
+                    <Quote className="h-7 w-7 text-emerald-600" />
+                    <span className="rounded-full border border-emerald-100
+                      bg-white/80 px-3 py-1 text-xs font-bold text-emerald-800">
+                      {alum.batch}
+                    </span>
+                  </div>
+
+                  <p className="mt-5 text-sm italic leading-7 text-slate-600">
+                    "{alum.quote}"
+                  </p>
+                </div>
+
+                <div className="mt-6 flex items-center gap-3 border-t
+                  border-emerald-100 pt-5">
+                  <img
+                    src={alum.avatar}
+                    alt={alum.name}
+                    loading="lazy"
+                    className="h-12 w-12 rounded-2xl border-2 border-white
+                      object-cover shadow-md"
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="truncate text-sm font-bold text-emerald-950">
+                        {alum.name}
                       </h3>
-                      <div className="text-xs font-semibold text-emerald-700">
-                        {teacher.role}
-                      </div>
-                      <div className="text-[11px] text-gray-500 mt-0.5">
-                        {teacher.qualification}
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="space-y-1.5 text-xs text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <div className="flex items-start gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
-                      <span><strong>Teaching:</strong> {teacher.subject}</span>
+                      {alum.name?.includes("Bibash") && onOpenDeveloper && (
+                        <button
+                          type="button"
+                          onClick={onOpenDeveloper}
+                          className="rounded-md bg-lime-200 px-2 py-0.5
+                            text-[10px] font-bold text-emerald-950"
+                        >
+                          Developer
+                        </button>
+                      )}
                     </div>
-                    <div className="flex items-start gap-1.5">
-                      <Award className="w-3.5 h-3.5 text-lime-700 shrink-0 mt-0.5" />
-                      <span><strong>Specialty:</strong> {teacher.specialty}</span>
-                    </div>
+
+                    <p className="mt-1 truncate text-xs font-semibold text-emerald-700">
+                      {alum.currentRole}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-slate-500">
+                      {alum.affiliation}
+                    </p>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-                  <a
-                    href={`tel:${teacher.phone}`}
-                    className="flex items-center gap-1.5 text-emerald-800 hover:text-emerald-950 font-semibold"
-                  >
-                    <Phone className="w-3.5 h-3.5" /> {teacher.phone}
-                  </a>
-                  <a
-                    href={`mailto:${teacher.email}`}
-                    className="flex items-center gap-1.5 text-gray-500 hover:text-emerald-800"
-                    title={teacher.email}
-                  >
-                    <Mail className="w-3.5 h-3.5" /> Message
-                  </a>
-                </div>
-              </div>
+              </GlassCard>
             ))}
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* =====================================================
+          6. TEACHERS AND STAFF
+      ====================================================== */}
+      <section id="teachers" className="px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeading
+            eyebrow="Our Faculty"
+            title="Meet Our Dedicated Educators"
+            description="Learn about the teachers and academic staff who support student learning and practical skill development."
+          />
+
+          <GlassCard className="p-5 sm:p-8 lg:p-10">
+            <div className="mb-8 flex flex-col gap-5 md:flex-row
+              md:items-center md:justify-between">
+              <div>
+                <h3 className="text-xl font-extrabold text-emerald-950">
+                  Faculty & Academic Staff
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Find a teacher by name, role, or subject.
+                </p>
+              </div>
+
+              <div className="relative w-full md:max-w-sm">
+                <Search className="absolute left-4 top-1/2 h-4 w-4
+                  -translate-y-1/2 text-emerald-700" />
+
+                <input
+                  type="search"
+                  value={teacherSearch}
+                  onChange={(event) => setTeacherSearch(event.target.value)}
+                  placeholder="Search teachers..."
+                  aria-label="Search teachers by name, role, or subject"
+                  className="w-full rounded-2xl border border-white/90
+                    bg-white/70 py-3.5 pl-11 pr-4 text-sm text-slate-800
+                    shadow-sm outline-none backdrop-blur-xl transition
+                    placeholder:text-slate-400 focus:border-emerald-400
+                    focus:ring-4 focus:ring-emerald-100"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredTeachers.map((teacher) => (
+                <div
+                  key={teacher.id}
+                  className="flex flex-col justify-between rounded-2xl
+                    border border-white/90 bg-white/60 p-5 backdrop-blur-xl
+                    transition hover:-translate-y-1 hover:bg-white/90
+                    hover:shadow-xl hover:shadow-emerald-900/5"
+                >
+                  <div>
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={teacher.photo}
+                        alt={teacher.name}
+                        loading="lazy"
+                        className="h-16 w-16 shrink-0 rounded-2xl
+                          border-2 border-white object-cover shadow-md"
+                      />
+
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-emerald-950">
+                          {teacher.name}
+                        </h3>
+
+                        <p className="mt-1 text-sm font-semibold text-emerald-700">
+                          {teacher.role}
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                          {teacher.qualification}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 space-y-3 rounded-xl border
+                      border-white/80 bg-white/60 p-4">
+                      <div className="flex items-start gap-3">
+                        <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                        <p className="text-xs leading-6 text-slate-600">
+                          <span className="font-bold text-emerald-950">
+                            Teaching:
+                          </span>{" "}
+                          {teacher.subject}
+                        </p>
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                        <Award className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                        <p className="text-xs leading-6 text-slate-600">
+                          <span className="font-bold text-emerald-950">
+                            Specialty:
+                          </span>{" "}
+                          {teacher.specialty}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap items-center justify-between
+                    gap-3 border-t border-emerald-100 pt-4">
+                    {teacher.phone ? (
+                      <a
+                        href={`tel:${teacher.phone}`}
+                        className="inline-flex items-center gap-2 text-xs
+                          font-semibold text-emerald-800 hover:text-emerald-600"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Call
+                      </a>
+                    ) : (
+                      <span />
+                    )}
+
+                    {teacher.email && (
+                      <a
+                        href={`mailto:${teacher.email}`}
+                        className="inline-flex items-center gap-2 text-xs
+                          font-semibold text-slate-600 hover:text-emerald-800"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Send Email
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {filteredTeachers.length === 0 && (
+                <div className="col-span-full rounded-2xl border
+                  border-white/80 bg-white/60 p-10 text-center">
+                  <Search className="mx-auto h-8 w-8 text-emerald-600" />
+                  <h3 className="mt-4 font-bold text-emerald-950">
+                    No teachers found
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-600">
+                    Try another name, role, or subject.
+                  </p>
+                </div>
+              )}
+            </div>
+          </GlassCard>
+        </div>
+      </section>
+
+      {/* =====================================================
+          7. FINAL CALL TO ACTION
+      ====================================================== */}
+      <section className="px-4 pb-20 pt-8 sm:px-6 lg:pb-28">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[32px]
+          border border-white/20 bg-gradient-to-br from-emerald-950
+          via-emerald-900 to-green-800 px-6 py-14 text-center
+          shadow-[0_25px_80px_rgba(6,55,30,0.18)] sm:px-12 sm:py-20">
+
+          <div className="pointer-events-none absolute -left-20 -top-20
+            h-64 w-64 rounded-full border border-white/10 bg-white/5 blur-2xl" />
+
+          <div className="pointer-events-none absolute -bottom-24 -right-16
+            h-72 w-72 rounded-full border border-white/10 bg-lime-300/10 blur-2xl" />
+
+          <div className="relative z-10 mx-auto max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-full
+              border border-white/20 bg-white/10 px-4 py-2 text-xs
+              font-bold uppercase tracking-widest text-lime-200 backdrop-blur-xl">
+              <Sprout className="h-4 w-4" />
+              Your Future Starts Here
+            </span>
+
+            <h2 className="mt-6 text-3xl font-black leading-tight
+              tracking-tight text-white sm:text-4xl lg:text-5xl">
+              Ready to Grow With Us?
+            </h2>
+
+            <p className="mx-auto mt-5 max-w-2xl text-sm leading-7
+              text-white/80 sm:text-base sm:leading-8">
+              Discover our programs, connect with our school, and explore
+              opportunities in technical and agricultural education.
+            </p>
+
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <a
+                href="#program"
+                className="inline-flex items-center gap-2 rounded-2xl
+                  bg-lime-300 px-6 py-3.5 text-sm font-bold text-emerald-950
+                  transition hover:-translate-y-1 hover:bg-lime-200"
+              >
+                Explore Programs
+                <ArrowRight className="h-4 w-4" />
+              </a>
+
+              <a
+                href="#leadership"
+                className="inline-flex items-center gap-2 rounded-2xl
+                  border border-white/30 bg-white/10 px-6 py-3.5
+                  text-sm font-bold text-white backdrop-blur-xl
+                  transition hover:bg-white/20"
+              >
+                Meet Our Leadership
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
