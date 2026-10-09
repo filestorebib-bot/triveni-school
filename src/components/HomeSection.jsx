@@ -893,86 +893,280 @@ export default function HomeSection({
           5. ALUMNI TESTIMONIALS
       ====================================================== */}
 
-      <section
-        id="alumni"
-        className="px-4 py-12 sm:px-6 sm:py-16 lg:py-24"
+      import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  Quote,
+  GraduationCap,
+  ArrowUpRight,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+
+// Make sure GlassCard, SectionHeading, ALUMNI_TESTIMONIALS,
+// and onOpenDeveloper are available in your project.
+
+export default function AlumniSection({ onOpenDeveloper }) {
+  const shouldReduceMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const alumni = ALUMNI_TESTIMONIALS || [];
+
+  const nextSlide = () => {
+    setActiveIndex((prev) => (prev + 1) % Math.max(alumni.length, 1));
+  };
+
+  const previousSlide = () => {
+    setActiveIndex(
+      (prev) => (prev - 1 + alumni.length) % Math.max(alumni.length, 1)
+    );
+  };
+
+  const revealAnimation = shouldReduceMotion
+    ? {}
+    : {
+        hidden: { opacity: 0, y: 35 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.65, ease: "easeOut" },
+        },
+      };
+
+  if (!alumni.length) return null;
+
+  return (
+    <section
+      id="alumni"
+      className="relative isolate overflow-hidden bg-gradient-to-b from-white via-emerald-50/50 to-white px-4 py-16 sm:px-6 sm:py-20 lg:py-28"
+    >
+      {/* Decorative background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
       >
-        <div className="mx-auto max-w-7xl">
+        <motion.div
+          animate={
+            shouldReduceMotion
+              ? {}
+              : { x: [0, 35, 0], y: [0, -25, 0], scale: [1, 1.12, 1] }
+          }
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -left-24 top-16 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl sm:h-80 sm:w-80"
+        />
+
+        <motion.div
+          animate={
+            shouldReduceMotion
+              ? {}
+              : { x: [0, -30, 0], y: [0, 30, 0], scale: [1, 1.15, 1] }
+          }
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-lime-200/30 blur-3xl sm:h-96 sm:w-96"
+        />
+
+        <div className="absolute inset-0 bg-[radial-gradient(#05966912_1px,transparent_1px)] [background-size:24px_24px]" />
+      </div>
+
+      <div className="mx-auto max-w-7xl">
+        {/* Heading */}
+        <motion.div
+          variants={revealAnimation}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
           <SectionHeading
-            eyebrow="Alumni Stories"
-            title="Learning That Goes Beyond the Classroom"
-            description="Discover the experiences and journeys of former students as they pursue further education and professional opportunities."
+            eyebrow="Our Alumni Network"
+            title="Great Beginnings. Inspiring Journeys."
+            description="From our classrooms to new opportunities, discover the people, ambitions, and achievements that make our school community special."
           />
+        </motion.div>
 
-          <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4 sm:gap-5">
-            {(ALUMNI_TESTIMONIALS || []).map((alum) => (
-              <GlassCard
-                key={alum.id}
-                className="flex min-w-0 flex-col justify-between p-5 sm:p-6"
-              >
-                <div>
+        {/* Intro banner */}
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6 }}
+          className="relative mb-8 mt-8 overflow-hidden rounded-3xl border border-white/80 bg-white/65 p-5 shadow-[0_12px_50px_-25px_rgba(5,150,105,0.25)] backdrop-blur-2xl sm:mb-10 sm:mt-10 sm:p-7 lg:p-8"
+        >
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-600/20 sm:h-16 sm:w-16">
+                <GraduationCap className="h-8 w-8" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-emerald-700">
+                  Once a student, always a part of us
+                </p>
+                <h3 className="mt-1 text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl lg:text-2xl">
+                  The Triveni legacy continues.
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Every journey tells a story. Every achievement inspires the
+                  next generation.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2 self-start rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 sm:self-center">
+              <Sparkles className="h-4 w-4 text-emerald-600" />
+              <span className="whitespace-nowrap text-xs font-bold text-emerald-800">
+                Proudly Triveni
+              </span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Alumni cards */}
+        <div className="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {alumni.map((alum, index) => (
+            <motion.div
+              key={alum.id}
+              variants={revealAnimation}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{
+                delay: shouldReduceMotion ? 0 : (index % 4) * 0.1,
+              }}
+              whileHover={shouldReduceMotion ? {} : { y: -8 }}
+              className="group relative min-w-0"
+            >
+              {/* Hover glow */}
+              <div className="absolute -inset-px rounded-[1.6rem] bg-gradient-to-br from-emerald-400/40 via-teal-300/10 to-lime-300/40 opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100" />
+
+              <GlassCard className="relative flex h-full min-w-0 flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/75 p-5 shadow-[0_8px_35px_-20px_rgba(15,23,42,0.25)] backdrop-blur-xl transition-all duration-500 group-hover:border-emerald-200/90 group-hover:bg-white/95 group-hover:shadow-[0_20px_50px_-25px_rgba(5,150,105,0.35)] sm:p-6">
+                {/* Card decoration */}
+                <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-100/60 blur-2xl transition-transform duration-700 group-hover:scale-150" />
+
+                <div className="relative">
                   <div className="flex items-center justify-between gap-3">
-                    <Quote className="h-7 w-7 shrink-0 text-emerald-600" />
-
-                    <span
-                      className="max-w-[65%] break-words rounded-full
-                        border border-emerald-100 bg-white/80
-                        px-3 py-1 text-xs font-bold text-emerald-800"
+                    <motion.div
+                      animate={
+                        shouldReduceMotion ? {} : { rotate: [0, -5, 5, 0] }
+                      }
+                      transition={{
+                        duration: 5,
+                        repeat: Infinity,
+                        delay: index * 0.3,
+                      }}
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 transition-colors duration-300 group-hover:bg-emerald-600 group-hover:text-white"
                     >
+                      <Quote className="h-5 w-5" />
+                    </motion.div>
+
+                    <span className="max-w-[65%] truncate rounded-full border border-emerald-100 bg-emerald-50/80 px-3 py-1.5 text-[11px] font-extrabold text-emerald-800">
                       {alum.batch}
                     </span>
                   </div>
 
-                  <p className="mt-5 break-words text-sm italic leading-7 text-slate-600">
-                    "{alum.quote}"
+                  <p className="mt-5 text-sm leading-7 text-slate-600">
+                    <span className="mr-1 text-xl font-bold text-emerald-600">
+                      “
+                    </span>
+                    {alum.quote}
+                    <span className="ml-1 text-xl font-bold text-emerald-600">
+                      ”
+                    </span>
                   </p>
                 </div>
 
-                <div
-                  className="mt-6 flex min-w-0 items-center gap-3
-                    border-t border-emerald-100 pt-5"
-                >
-                  <img
-                    src={alum.avatar}
-                    alt={alum.name}
-                    loading="lazy"
-                    className="h-12 w-12 shrink-0 rounded-2xl
-                      border-2 border-white object-cover shadow-md"
-                  />
+                {/* Alumni profile */}
+                <div className="relative mt-6 border-t border-emerald-100/80 pt-5">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="relative shrink-0">
+                      <img
+                        src={alum.avatar}
+                        alt={alum.name || "Alumni profile"}
+                        loading="lazy"
+                        className="h-12 w-12 rounded-2xl border-2 border-white object-cover shadow-md ring-1 ring-emerald-100 transition-transform duration-500 group-hover:scale-105 sm:h-14 sm:w-14"
+                      />
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="break-words text-sm font-bold text-emerald-950">
-                        {alum.name}
-                      </h3>
-
-                      {alum.name?.includes("Bibash") && onOpenDeveloper && (
-                        <button
-                          type="button"
-                          onClick={onOpenDeveloper}
-                          className="rounded-md bg-lime-200 px-2 py-0.5
-                            text-[10px] font-bold text-emerald-950"
-                        >
-                          Developer
-                        </button>
-                      )}
+                      <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
                     </div>
 
-                    <p className="mt-1 break-words text-xs font-semibold text-emerald-700">
-                      {alum.currentRole}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="min-w-0 break-words text-sm font-extrabold leading-5 text-emerald-950">
+                          {alum.name}
+                        </h3>
 
-                    <p className="mt-1 break-words text-xs text-slate-500">
-                      {alum.affiliation}
-                    </p>
+                        {alum.name?.includes("Bibash") &&
+                          onOpenDeveloper && (
+                            <button
+                              type="button"
+                              onClick={onOpenDeveloper}
+                              className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-lime-200 bg-lime-100 px-2 py-1 text-[10px] font-extrabold text-emerald-950 transition-colors hover:bg-lime-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+                            >
+                              Developer
+                              <ArrowUpRight className="h-3 w-3" />
+                            </button>
+                          )}
+                      </div>
+
+                      <p className="mt-1 break-words text-xs font-bold leading-5 text-emerald-700">
+                        {alum.currentRole}
+                      </p>
+
+                      <p className="mt-1 break-words text-xs leading-5 text-slate-500">
+                        {alum.affiliation}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </GlassCard>
-            ))}
-          </div>
+            </motion.div>
+          ))}
         </div>
-      </section>
 
+        {/* Optional navigation for large alumni lists */}
+        {alumni.length > 4 && (
+          <div className="mt-8 flex items-center justify-center gap-4 lg:hidden">
+            <button
+              type="button"
+              onClick={previousSlide}
+              aria-label="Previous alumni"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-800 shadow-sm transition hover:bg-emerald-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+
+            <span className="min-w-16 text-center text-xs font-bold tabular-nums text-slate-500">
+              {activeIndex + 1} / {alumni.length}
+            </span>
+
+            <button
+              type="button"
+              onClick={nextSlide}
+              aria-label="Next alumni"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-800 shadow-sm transition hover:bg-emerald-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+
+        {/* Closing line */}
+        <motion.p
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-10 text-center text-sm leading-6 text-slate-500 sm:mt-12"
+        >
+          <span className="font-bold text-emerald-700">
+            One school. Many journeys.
+          </span>{" "}
+          A shared legacy that keeps growing.
+        </motion.p>
+      </div>
+    </section>
+  );
+}
       {/* =====================================================
           6. TEACHERS AND STAFF
       ====================================================== */}
