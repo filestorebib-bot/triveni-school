@@ -1,0 +1,8 @@
+{
+  "name": "Triveni Secondary School",
+  "description": "Triveni Secondary School, Department of Plant Science, Katari-4, Udayapur, Koshi Province, Nepal.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
