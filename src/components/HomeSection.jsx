@@ -1,26 +1,21 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  Sprout,
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
   GraduationCap,
-  ChevronLeft,
-  ChevronRight,
+  Leaf,
+  Search,
+  Sprout,
+  Users,
   Phone,
   Mail,
-  ArrowRight,
-  Wheat,
-  Flower2,
-  Microscope,
-  Layers,
-  Tractor,
-  Briefcase,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
   Quote,
-  Search,
-  Award,
-  Sparkles,
-  ExternalLink,
-  BookOpen,
 } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 
 import {
   SCHOOL_INFO,
@@ -30,1294 +25,981 @@ import {
   TEACHERS_LIST,
 } from "../data/schoolData";
 
-/* =========================================================
-   GLASS CARD
-========================================================= */
+const DEFAULT_SCHOOL = {
+  name: "Triveni Secondary School",
+  department: "Department of Plant Science",
+  address: "Katari-4, Udayapur, Koshi Province, Nepal",
+  phone: "035-450-154",
+  email: "",
+};
 
-const GlassCard = ({ children, className = "" }) => (
-  <div
-    className={`rounded-2xl border border-white/70 bg-white/75
-      shadow-[0_8px_32px_rgba(15,80,45,0.08)]
-      backdrop-blur-2xl transition-all duration-300
-      sm:rounded-3xl hover:border-emerald-200
-      hover:shadow-[0_16px_50px_rgba(15,80,45,0.13)]
-      ${className}`}
-  >
-    {children}
-  </div>
-);
+const DEFAULT_SLIDES = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=85",
+    title: "Growing Knowledge, Growing Futures",
+    subtitle:
+      "Practical agricultural education for a greener and more sustainable future.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1499529112087-3cb3b73cec95?auto=format&fit=crop&w=2000&q=85",
+    title: "Learning Beyond the Classroom",
+    subtitle:
+      "Building skills through practical learning, field experience and innovation.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=2000&q=85",
+    title: "Cultivating a Better Tomorrow",
+    subtitle:
+      "Preparing students to contribute to agriculture, communities and the environment.",
+  },
+];
 
-/* =========================================================
-   SECTION HEADING
-========================================================= */
+const DEFAULT_FOCUS_AREAS = [
+  {
+    title: "Plant Science",
+    description:
+      "Understand plant growth, crop production and the science behind healthy plants.",
+    icon: Sprout,
+  },
+  {
+    title: "Practical Learning",
+    description:
+      "Connect classroom concepts with hands-on activities and field experience.",
+    icon: BookOpen,
+  },
+  {
+    title: "Sustainable Agriculture",
+    description:
+      "Explore responsible farming practices that support people and the environment.",
+    icon: Leaf,
+  },
+  {
+    title: "Student Development",
+    description:
+      "Develop teamwork, problem-solving skills, confidence and leadership.",
+    icon: GraduationCap,
+  },
+];
 
-const SectionHeading = ({ eyebrow, title, description }) => (
-  <div className="mx-auto mb-8 max-w-3xl text-center sm:mb-10">
-    <span
-      className="inline-flex max-w-full items-center justify-center gap-2
-        rounded-full border border-emerald-200/80 bg-white/80
-        px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em]
-        text-emerald-800 shadow-sm backdrop-blur-xl
-        min-[400px]:px-4 min-[400px]:text-xs"
-    >
-      <Sprout className="h-4 w-4 shrink-0" />
-      {eyebrow}
-    </span>
+const DEFAULT_TESTIMONIALS = [
+  {
+    name: "Our Students",
+    role: "Student Community",
+    quote:
+      "Practical learning helps us understand how classroom knowledge can be applied in real agricultural settings.",
+  },
+  {
+    name: "Our Alumni",
+    role: "Alumni Community",
+    quote:
+      "The knowledge and skills developed during our studies continue to guide us in our future work.",
+  },
+];
 
-    <h2
-      className="mt-4 text-2xl font-black leading-tight tracking-tight
-        text-emerald-950 min-[400px]:text-3xl
-        sm:mt-5 sm:text-4xl lg:text-5xl"
-    >
-      {title}
-    </h2>
+const DEFAULT_TEACHERS = [];
 
-    {description && (
-      <p
-        className="mx-auto mt-3 max-w-2xl text-sm leading-7
-          text-slate-600 sm:mt-4 sm:text-base"
-      >
-        {description}
-      </p>
-    )}
-  </div>
-);
+const getText = (value, fallback = "") =>
+  typeof value === "string" && value.trim() ? value : fallback;
 
-/* =========================================================
-   HOME SECTION
-========================================================= */
-
-export default function HomeSection({
-  onOpenDeveloper,
-  onSelectImage,
-  onSelectNotice,
-}) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [teacherSearch, setTeacherSearch] = useState("");
-
-  const slides = HERO_CAROUSEL_IMAGES || [];
-
-  /* AUTOMATIC IMAGE SLIDER */
-
-  useEffect(() => {
-    if (slides.length < 2) return;
-
-    const timer = setInterval(() => {
-      setCurrentSlide((previous) => (previous + 1) % slides.length);
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, [slides.length]);
-
-  useEffect(() => {
-    if (currentSlide >= slides.length) {
-      setCurrentSlide(0);
-    }
-  }, [currentSlide, slides.length]);
-
-  const nextSlide = () => {
-    if (!slides.length) return;
-
-    setCurrentSlide((previous) => (previous + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    if (!slides.length) return;
-
-    setCurrentSlide(
-      (previous) => (previous - 1 + slides.length) % slides.length
-    );
-  };
-
-  /* TEACHER SEARCH */
-
-  const filteredTeachers = (TEACHERS_LIST || []).filter((teacher) => {
-    const search = teacherSearch.trim().toLowerCase();
-
-    return (
-      (teacher.name || "").toLowerCase().includes(search) ||
-      (teacher.subject || "").toLowerCase().includes(search) ||
-      (teacher.role || "").toLowerCase().includes(search)
-    );
-  });
-
-  /* FOCUS AREA ICONS */
-
-  const focusIcons = [
-    Wheat,
-    Flower2,
-    Microscope,
-    Layers,
-    Tractor,
-    Briefcase,
-  ];
-
-  /* SCHOOL LEADERSHIP */
-
-  const leadership = [
-    {
-      key: "coordinator",
-      label: "Department Coordinator",
-      data: SCHOOL_INFO.coordinator,
-      accent: "emerald",
-    },
-    {
-      key: "principal",
-      label: "School Principal",
-      data: SCHOOL_INFO.principal,
-      accent: "lime",
-    },
-  ];
+const getImageUrl = (item) => {
+  if (typeof item === "string") return item;
 
   return (
-    <main
-      id="home"
-      className="relative isolate overflow-x-clip bg-[#f5faf6] text-slate-800"
+    item?.image ||
+    item?.imageUrl ||
+    item?.src ||
+    item?.url ||
+    item?.photo ||
+    ""
+  );
+};
+
+const getSlideTitle = (item, fallback) =>
+  item?.title || item?.heading || fallback;
+
+const getSlideSubtitle = (item, fallback) =>
+  item?.subtitle || item?.description || item?.text || fallback;
+
+function SectionHeading({ eyebrow, title, description, centered = true }) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.5 }}
+      className={`mb-10 max-w-3xl ${
+        centered ? "mx-auto text-center" : "text-left"
+      }`}
     >
-      {/* =====================================================
-          BACKGROUND DECORATION
-      ====================================================== */}
+      {eyebrow && (
+        <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-800">
+          <Leaf size={14} />
+          {eyebrow}
+        </span>
+      )}
 
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div
-          className="absolute -left-40 top-40 h-72 w-72 rounded-full
-            bg-emerald-300/20 blur-[100px] sm:h-96 sm:w-96"
-        />
+      <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+        {title}
+      </h2>
 
-        <div
-          className="absolute -right-40 top-[850px] h-72 w-72 rounded-full
-            bg-lime-300/20 blur-[100px] sm:h-96 sm:w-96"
-        />
+      {description && (
+        <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg">
+          {description}
+        </p>
+      )}
+    </motion.div>
+  );
+}
 
-        <div
-          className="absolute left-1/3 top-[1700px] h-72 w-72 rounded-full
-            bg-teal-200/20 blur-[100px] sm:h-96 sm:w-96"
-        />
+function GlassCard({ children, className = "" }) {
+  return (
+    <div
+      className={`rounded-3xl border border-white/70 bg-white/80 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
 
-        <div
-          className="absolute inset-0 opacity-[0.15]"
-          style={{
-            backgroundImage:
-              "radial-gradient(#86a891 0.7px, transparent 0.7px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-      </div>
+function HeroSlider({ slides, schoolName, department }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const reduceMotion = useReducedMotion();
 
-      {/* =====================================================
-          1. RESPONSIVE AUTOMATIC HERO SLIDER
-      ====================================================== */}
+  const safeSlides = slides.length ? slides : DEFAULT_SLIDES;
 
-      <section className="px-2 pb-8 pt-3 min-[480px]:px-4 sm:px-6 sm:pb-10 sm:pt-5 lg:px-8">
-        <div className="relative mx-auto max-w-[1600px]">
-          <div
-            className="group relative h-[650px] overflow-hidden rounded-2xl
-              border border-white/60 bg-emerald-950
-              shadow-[0_20px_60px_rgba(6,55,30,0.18)]
-              min-[400px]:h-[630px] min-[480px]:h-[610px]
-              sm:h-[650px] sm:rounded-[28px]
-              lg:h-[680px] lg:rounded-[36px]"
-          >
-            {/* SLIDES */}
+  useEffect(() => {
+    if (safeSlides.length < 2 || reduceMotion) return undefined;
 
-            {slides.length > 0 ? (
-              slides.map((slide, index) => (
-                <div
-                  key={`${slide.url}-${index}`}
-                  className={`absolute inset-0 transition-opacity duration-1000
-                    ease-in-out ${
-                      currentSlide === index
-                        ? "z-10 opacity-100"
-                        : "z-0 opacity-0"
-                    }`}
-                  aria-hidden={currentSlide !== index}
-                >
-                  <img
-                    src={slide.url}
-                    alt={slide.title || "Triveni Secondary School"}
-                    className={`h-full w-full object-cover object-center
-                      transition-transform duration-[7000ms] ease-out ${
-                        currentSlide === index
-                          ? "scale-105"
-                          : "scale-100"
-                      }`}
-                    loading={index === 0 ? "eager" : "lazy"}
-                    fetchPriority={index === 0 ? "high" : "auto"}
-                  />
+    const interval = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % safeSlides.length);
+    }, 5500);
 
-                  <div
-                    className="absolute inset-0 bg-gradient-to-r
-                      from-[#062d1c]/90 via-[#062d1c]/65 to-[#062d1c]/20"
-                  />
+    return () => window.clearInterval(interval);
+  }, [safeSlides.length, reduceMotion]);
 
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t
-                      from-[#062d1c]/80 via-transparent to-black/15"
-                  />
-                </div>
-              ))
-            ) : (
-              <div
-                className="absolute inset-0 bg-gradient-to-br
-                  from-emerald-950 via-emerald-800 to-green-600"
-              />
-            )}
+  useEffect(() => {
+    if (activeIndex >= safeSlides.length) {
+      setActiveIndex(0);
+    }
+  }, [activeIndex, safeSlides.length]);
 
-            {/* GLASS DECORATION */}
+  const goToSlide = (index) => {
+    setActiveIndex((index + safeSlides.length) % safeSlides.length);
+  };
 
+  const currentSlide = safeSlides[activeIndex] || DEFAULT_SLIDES[0];
+
+  return (
+    <section className="relative isolate overflow-hidden bg-slate-950">
+      <div className="relative min-h-[590px] sm:min-h-[660px] lg:min-h-[730px]">
+        {safeSlides.map((slide, index) => {
+          const image = getImageUrl(slide);
+
+          return (
             <div
-              className="pointer-events-none absolute -right-24 -top-24
-                z-10 h-64 w-64 rounded-full border border-white/10
-                bg-white/5 backdrop-blur-sm sm:h-80 sm:w-80"
-            />
-
-            <div
-              className="pointer-events-none absolute -bottom-40 right-1/4
-                z-10 h-72 w-72 rounded-full border border-white/10
-                bg-white/5 backdrop-blur-sm sm:h-96 sm:w-96"
-            />
-
-            {/* HERO CONTENT */}
-
-            <div
-              className="relative z-20 flex h-full min-h-0 flex-col
-                justify-center px-5 py-16
-                min-[400px]:px-6 min-[480px]:px-8
-                sm:px-12 lg:px-20"
+              key={`${image}-${index}`}
+              aria-hidden={activeIndex !== index}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                activeIndex === index ? "opacity-100" : "opacity-0"
+              }`}
             >
-              <div className="max-w-4xl">
-                {/* TOP BADGE */}
+              <img
+                src={image || DEFAULT_SLIDES[index % DEFAULT_SLIDES.length].image}
+                alt={getSlideTitle(slide, "Agricultural education")}
+                className="h-full w-full object-cover"
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+            </div>
+          );
+        })}
 
-                <div
-                  className="mb-5 inline-flex max-w-full items-center gap-2
-                    rounded-2xl border border-white/25 bg-white/10
-                    px-3 py-2 text-[10px] font-semibold leading-5
-                    tracking-wide text-white shadow-lg backdrop-blur-xl
-                    min-[400px]:text-xs sm:mb-7 sm:rounded-full
-                    sm:px-4 sm:text-sm"
-                >
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full bg-lime-300
-                      shadow-[0_0_12px_rgba(190,242,100,0.9)]"
-                  />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-slate-950/20" />
 
-                  <Sprout className="h-4 w-4 shrink-0 text-lime-300" />
-
-                  <span>
-                    Government Technical Vocational Stream · Grades 9–12
-                  </span>
-                </div>
-
-                <p
-                  className="mb-3 text-xs font-bold uppercase
-                    tracking-[0.16em] text-lime-200
-                    min-[400px]:text-sm sm:mb-4 sm:text-base
-                    sm:tracking-[0.22em]"
-                >
-                  Triveni Secondary School
-                </p>
-
-                <h1
-                  className="max-w-4xl text-[2.15rem] font-black
-                    leading-[1.08] tracking-tight text-white
-                    min-[400px]:text-4xl sm:text-5xl
-                    md:text-6xl lg:text-7xl"
-                >
-                  Cultivating Minds.
-
-                  <span className="mt-2 block text-lime-300">
-                    Growing the Future.
-                  </span>
-                </h1>
-
-                <p
-                  className="mt-5 max-w-2xl text-sm leading-6
-                    text-white/90 sm:mt-7 sm:text-base
-                    sm:leading-8 lg:text-lg"
-                >
-                  Discover quality education, practical agricultural training,
-                  and the knowledge to build a more sustainable future through
-                  the Department of Plant Science.
-                </p>
-
-                {/* RESPONSIVE HERO BUTTONS */}
-
-                <div
-                  className="mt-7 flex flex-col items-stretch gap-3
-                    min-[480px]:flex-row min-[480px]:flex-wrap
-                    min-[480px]:items-center sm:mt-9"
-                >
-                  <a
-                    href="#program"
-                    className="inline-flex min-h-12 items-center
-                      justify-center gap-2 rounded-xl bg-lime-300
-                      px-5 py-3 text-center text-sm font-bold
-                      text-emerald-950 shadow-lg transition
-                      hover:-translate-y-0.5 hover:bg-lime-200
-                      sm:rounded-2xl sm:px-6"
-                  >
-                    Explore Our Programs
-                    <ArrowRight className="h-4 w-4 shrink-0" />
-                  </a>
-
-                  <a
-                    href="#about"
-                    className="inline-flex min-h-12 items-center
-                      justify-center gap-2 rounded-xl border
-                      border-white/30 bg-white/10 px-5 py-3
-                      text-center text-sm font-bold text-white
-                      backdrop-blur-xl transition hover:bg-white/20
-                      sm:rounded-2xl sm:px-6"
-                  >
-                    Discover Our School
-                    <ExternalLink className="h-4 w-4 shrink-0" />
-                  </a>
-
-                  {slides.length > 0 && onSelectImage && (
-                    <button
-                      type="button"
-                      onClick={() => onSelectImage(slides[currentSlide])}
-                      className="inline-flex min-h-12 items-center
-                        justify-center gap-2 rounded-xl border
-                        border-white/20 bg-black/15 px-5 py-3
-                        text-sm font-semibold text-white
-                        backdrop-blur-xl transition hover:bg-white/15
-                        sm:rounded-2xl"
-                    >
-                      View Image
-                      <ExternalLink className="h-4 w-4 shrink-0" />
-                    </button>
-                  )}
-                </div>
-
-                {/* TRUST INDICATORS */}
-
-                <div
-                  className="mt-7 grid grid-cols-1 gap-3
-                    border-t border-white/20 pt-5
-                    text-xs text-white/90
-                    min-[400px]:grid-cols-2
-                    sm:mt-10 sm:flex sm:flex-wrap sm:gap-x-7
-                    sm:gap-y-4 sm:pt-6 sm:text-sm"
-                >
-                  <span className="flex items-center gap-2">
-                    <GraduationCap className="h-5 w-5 shrink-0 text-lime-300" />
-                    Technical Education
-                  </span>
-
-                  <span className="flex items-center gap-2">
-                    <Sprout className="h-5 w-5 shrink-0 text-lime-300" />
-                    Practical Learning
-                  </span>
-
-                  <span className="flex items-center gap-2">
-                    <Award className="h-5 w-5 shrink-0 text-lime-300" />
-                    Future-Ready Skills
-                  </span>
-                </div>
+        <div className="relative mx-auto flex min-h-[590px] max-w-7xl items-center px-5 py-20 sm:min-h-[660px] sm:px-8 lg:min-h-[730px] lg:px-12">
+          <div className="max-w-4xl">
+            <motion.div
+              key={`hero-${activeIndex}`}
+              initial={reduceMotion ? false : { opacity: 0, y: 25 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65 }}
+            >
+              <div className="mb-7 inline-flex items-center gap-3 rounded-full border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-xl sm:px-5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400 text-slate-950">
+                  <Sprout size={18} />
+                </span>
+                <span>{schoolName}</span>
               </div>
+
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-emerald-300 sm:text-sm">
+                {department}
+              </p>
+
+              <h1 className="max-w-4xl text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+                {getSlideTitle(
+                  currentSlide,
+                  "Growing Knowledge, Growing Futures"
+                )}
+              </h1>
+
+              <p className="mt-6 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg sm:leading-8">
+                {getSlideSubtitle(
+                  currentSlide,
+                  "Practical education, agricultural innovation and sustainable development."
+                )}
+              </p>
+
+              <div className="mt-9 flex flex-wrap gap-4">
+                <a
+                  href="#about"
+                  className="group inline-flex items-center gap-3 rounded-full bg-emerald-400 px-6 py-3.5 font-bold text-slate-950 shadow-lg shadow-emerald-950/20 transition hover:-translate-y-0.5 hover:bg-emerald-300"
+                >
+                  Discover Our School
+                  <ArrowRight
+                    size={18}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </a>
+
+                <a
+                  href="#focus-areas"
+                  className="inline-flex items-center gap-3 rounded-full border border-white/40 bg-white/10 px-6 py-3.5 font-semibold text-white backdrop-blur-xl transition hover:bg-white/20"
+                >
+                  Explore Plant Science
+                  <ArrowUpRight size={18} />
+                </a>
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="absolute bottom-8 left-5 right-5 flex items-center justify-between sm:left-8 sm:right-8 lg:left-12 lg:right-12">
+            <div className="flex items-center gap-2">
+              {safeSlides.map((slide, index) => (
+                <button
+                  key={`dot-${index}`}
+                  type="button"
+                  aria-label={`Show slide ${index + 1}`}
+                  aria-pressed={activeIndex === index}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2.5 rounded-full transition-all ${
+                    activeIndex === index
+                      ? "w-10 bg-emerald-400"
+                      : "w-2.5 bg-white/60 hover:bg-white"
+                  }`}
+                />
+              ))}
+              <span className="ml-3 text-sm font-medium text-white/80">
+                {String(activeIndex + 1).padStart(2, "0")} /{" "}
+                {String(safeSlides.length).padStart(2, "0")}
+              </span>
             </div>
 
-            {/* SLIDER NAVIGATION */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => goToSlide(activeIndex - 1)}
+                aria-label="Previous slide"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-xl transition hover:bg-white/25"
+              >
+                <ChevronLeft size={21} />
+              </button>
 
-            {slides.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={prevSlide}
-                  aria-label="Previous slide"
-                  className="absolute left-2 top-1/2 z-30
-                    flex h-9 w-9 -translate-y-1/2 items-center
-                    justify-center rounded-full border border-white/30
-                    bg-black/25 text-white shadow-lg backdrop-blur-xl
-                    transition hover:scale-105 hover:bg-white/30
-                    min-[480px]:left-3 sm:left-6 sm:h-12 sm:w-12"
-                >
-                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-                </button>
+              <button
+                type="button"
+                onClick={() => goToSlide(activeIndex + 1)}
+                aria-label="Next slide"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-xl transition hover:bg-white/25"
+              >
+                <ChevronRight size={21} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-                <button
-                  type="button"
-                  onClick={nextSlide}
-                  aria-label="Next slide"
-                  className="absolute right-2 top-1/2 z-30
-                    flex h-9 w-9 -translate-y-1/2 items-center
-                    justify-center rounded-full border border-white/30
-                    bg-black/25 text-white shadow-lg backdrop-blur-xl
-                    transition hover:scale-105 hover:bg-white/30
-                    min-[480px]:right-3 sm:right-6 sm:h-12 sm:w-12"
-                >
-                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
-                </button>
+function LeadershipCard({ title, person, fallbackName, accent = "emerald" }) {
+  const name = getText(
+    person?.name || person?.fullName,
+    fallbackName
+  );
 
-                {/* SLIDE INDICATORS */}
+  const designation = getText(
+    person?.designation || person?.position || person?.role,
+    title
+  );
 
-                <div
-                  className="absolute bottom-4 left-1/2 z-30
-                    flex -translate-x-1/2 items-center gap-2
-                    rounded-full border border-white/20
-                    bg-black/35 px-3 py-2 backdrop-blur-xl
-                    sm:bottom-7"
-                >
-                  {slides.map((slide, index) => (
-                    <button
-                      key={`${slide.url}-dot-${index}`}
-                      type="button"
-                      onClick={() => setCurrentSlide(index)}
-                      aria-label={`Show slide ${index + 1}`}
-                      aria-current={
-                        currentSlide === index ? "true" : undefined
-                      }
-                      className={`h-2.5 rounded-full transition-all duration-300 ${
-                        currentSlide === index
-                          ? "w-7 bg-lime-300 sm:w-8"
-                          : "w-2.5 bg-white/60 hover:bg-white"
-                      }`}
-                    />
-                  ))}
-                </div>
+  const photo =
+    person?.image ||
+    person?.photo ||
+    person?.photoUrl ||
+    person?.imageUrl ||
+    "";
 
-                {/* SLIDE NUMBER */}
+  const phone = person?.phone || person?.contact || "";
+  const email = person?.email || "";
 
-                <div
-                  className="absolute bottom-6 left-6 z-30 hidden
-                    font-mono text-xs tracking-widest text-white/80
-                    sm:block"
-                >
-                  {String(currentSlide + 1).padStart(2, "0")}
-                  <span className="mx-2 text-white/40">/</span>
-                  {String(slides.length).padStart(2, "0")}
-                </div>
-              </>
+  const accentClass =
+    accent === "blue"
+      ? "from-blue-500 to-cyan-400"
+      : "from-emerald-500 to-teal-400";
+
+  return (
+    <GlassCard className="group h-full overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)]">
+      <div className={`h-1.5 bg-gradient-to-r ${accentClass}`} />
+
+      <div className="p-6 sm:p-7">
+        <div className="mb-6 flex items-center gap-4">
+          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-100 ring-4 ring-white shadow-md sm:h-28 sm:w-28">
+            {photo ? (
+              <img
+                src={photo}
+                alt={name}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-50 to-blue-50 text-emerald-700">
+                <Users size={34} />
+              </div>
             )}
+          </div>
+
+          <div className="min-w-0">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
+              {title}
+            </p>
+            <h3 className="text-xl font-extrabold leading-snug text-slate-900 sm:text-2xl">
+              {name}
+            </h3>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              {designation}
+            </p>
+          </div>
+        </div>
+
+        {person?.qualification && (
+          <p className="mb-4 text-sm leading-6 text-slate-600">
+            {person.qualification}
+          </p>
+        )}
+
+        {person?.message && (
+          <p className="mb-5 text-sm leading-7 text-slate-600">
+            “{person.message}”
+          </p>
+        )}
+
+        <div className="space-y-3 border-t border-slate-100 pt-5">
+          {phone && (
+            <a
+              href={`tel:${String(phone).replace(/[^\d+]/g, "")}`}
+              className="flex items-center gap-3 text-sm text-slate-600 transition hover:text-emerald-700"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                <Phone size={16} />
+              </span>
+              <span>{phone}</span>
+            </a>
+          )}
+
+          {email && (
+            <a
+              href={`mailto:${email}`}
+              className="flex min-w-0 items-center gap-3 text-sm text-slate-600 transition hover:text-emerald-700"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                <Mail size={16} />
+              </span>
+              <span className="break-all">{email}</span>
+            </a>
+          )}
+
+          {!phone && !email && (
+            <p className="text-sm text-slate-400">
+              School leadership and academic guidance
+            </p>
+          )}
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
+
+function HomeSection() {
+  const school = SCHOOL_INFO || DEFAULT_SCHOOL;
+
+  const slides =
+    Array.isArray(HERO_CAROUSEL_IMAGES) &&
+    HERO_CAROUSEL_IMAGES.length > 0
+      ? HERO_CAROUSEL_IMAGES
+      : DEFAULT_SLIDES;
+
+  const focusAreas =
+    Array.isArray(CORE_FOCUS_AREAS) &&
+    CORE_FOCUS_AREAS.length > 0
+      ? CORE_FOCUS_AREAS
+      : DEFAULT_FOCUS_AREAS;
+
+  const testimonials =
+    Array.isArray(ALUMNI_TESTIMONIALS) &&
+    ALUMNI_TESTIMONIALS.length > 0
+      ? ALUMNI_TESTIMONIALS
+      : DEFAULT_TESTIMONIALS;
+
+  const teachers = Array.isArray(TEACHERS_LIST)
+    ? TEACHERS_LIST
+    : DEFAULT_TEACHERS;
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const reduceMotion = useReducedMotion();
+
+  const principal =
+    school.principal ||
+    school.principalInfo ||
+    school.leadership?.principal ||
+    {};
+
+  const coordinator =
+    school.coordinator ||
+    school.coordinatorInfo ||
+    school.leadership?.coordinator ||
+    {};
+
+  const principalName = getText(
+    principal.name,
+    "Gyanendra Bahadur Karki"
+  );
+
+  const coordinatorName = getText(
+    coordinator.name,
+    "Kailash Rayamajhi"
+  );
+
+  const filteredTeachers = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+
+    if (!query) return teachers.slice(0, 4);
+
+    return teachers
+      .filter((teacher) => {
+        const searchableText = [
+          teacher.name,
+          teacher.fullName,
+          teacher.designation,
+          teacher.subject,
+          teacher.department,
+          teacher.qualification,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(query);
+      })
+      .slice(0, 8);
+  }, [teachers, searchTerm]);
+
+  const schoolName = getText(
+    school.name || school.schoolName,
+    DEFAULT_SCHOOL.name
+  );
+
+  const department = getText(
+    school.department || school.subtitle,
+    DEFAULT_SCHOOL.department
+  );
+
+  return (
+    <main className="min-h-screen overflow-hidden bg-[#f7faf9] text-slate-800">
+      {/* HERO SLIDER */}
+      <HeroSlider
+        slides={slides}
+        schoolName={schoolName}
+        department={department}
+      />
+
+      {/* QUICK INFORMATION */}
+      <section className="relative z-10 mx-auto -mt-1 max-w-7xl px-5 sm:px-8 lg:px-12">
+        <div className="grid gap-4 rounded-b-3xl border border-white/80 bg-white/85 p-5 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-2xl sm:grid-cols-3 sm:p-7">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+              <MapPin size={22} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Our Location
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-800">
+                {getText(school.address, DEFAULT_SCHOOL.address)}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 border-slate-100 sm:border-l sm:pl-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+              <Phone size={22} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Contact Us
+              </p>
+              <a
+                href={`tel:${String(
+                  getText(school.phone, DEFAULT_SCHOOL.phone)
+                ).replace(/[^\d+]/g, "")}`}
+                className="mt-1 block text-sm font-semibold text-slate-800 hover:text-emerald-700"
+              >
+                {getText(school.phone, DEFAULT_SCHOOL.phone)}
+              </a>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 border-slate-100 sm:border-l sm:pl-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+              <Sprout size={22} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Our Department
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-800">
+                {department}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          2. WELCOME SECTION
-      ====================================================== */}
-
-      <section
-        id="about"
-        className="px-4 py-12 sm:px-6 sm:py-16 lg:py-24"
-      >
-        <div
-          className="mx-auto grid max-w-7xl items-center gap-8
-            lg:grid-cols-2 lg:gap-16"
-        >
-          <div className="min-w-0">
-            <span
-              className="inline-flex items-center gap-2 rounded-full
-                border border-emerald-200 bg-white/80 px-4 py-2
-                text-xs font-bold uppercase tracking-widest
-                text-emerald-800 backdrop-blur-xl"
-            >
-              <Sparkles className="h-4 w-4" />
+      {/* ABOUT SECTION */}
+      <section id="about" className="px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: -25 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.17em] text-emerald-800">
+              <Leaf size={15} />
               Welcome to Triveni
             </span>
 
-            <h2
-              className="mt-5 text-2xl font-black leading-tight
-                tracking-tight text-emerald-950
-                min-[400px]:text-3xl sm:mt-6 sm:text-4xl lg:text-5xl"
-            >
-              Education That Connects
-
-              <span className="block text-emerald-700">
-                Knowledge With Practice.
-              </span>
+            <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+              Education that grows with the world.
             </h2>
 
-            <p className="mt-5 text-sm leading-7 text-slate-600 sm:mt-6 sm:text-base sm:leading-8">
-              Welcome to Triveni Secondary School, Department of Plant Science,
-              Katari-4, Udayapur, Nepal. Our technical education approach brings
-              classroom learning closer to practical agricultural knowledge
-              and real-world skills.
+            <p className="mt-6 text-base leading-8 text-slate-600">
+              Welcome to {schoolName}, {department}. We aim to connect
+              academic learning with practical skills, agricultural
+              knowledge and responsible environmental practices.
             </p>
 
-            <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
-              Explore our academic programs, practical learning opportunities,
-              faculty, and activities designed to help students prepare for
-              their future.
+            <p className="mt-4 text-base leading-8 text-slate-600">
+              Our focus is to help students develop the knowledge,
+              confidence and practical understanding needed to contribute
+              to agriculture, their communities and a sustainable future.
             </p>
 
-            <a
-              href="#program"
-              className="mt-6 inline-flex min-h-12 items-center
-                justify-center gap-2 rounded-xl bg-emerald-800
-                px-5 py-3 text-sm font-bold text-white
-                shadow-lg shadow-emerald-900/10 transition
-                hover:-translate-y-0.5 hover:bg-emerald-700"
-            >
-              Explore Plant Science
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-
-          <div className="relative min-w-0">
-            <div
-              className="absolute -inset-2 rounded-3xl
-                bg-gradient-to-br from-emerald-200/60
-                to-lime-100/60 blur-2xl sm:-inset-4"
-            />
-
-            <GlassCard className="relative p-4 sm:p-6 lg:p-8">
-              <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4">
-                {[
-                  {
-                    icon: BookOpen,
-                    title: "Academic Learning",
-                    text: "Build a strong foundation through structured education.",
-                  },
-                  {
-                    icon: Sprout,
-                    title: "Practical Skills",
-                    text: "Connect theory with agricultural practice.",
-                  },
-                  {
-                    icon: Microscope,
-                    title: "Scientific Thinking",
-                    text: "Develop observation, investigation, and problem-solving.",
-                  },
-                  {
-                    icon: GraduationCap,
-                    title: "Career Preparation",
-                    text: "Explore pathways for further study and professional growth.",
-                  },
-                ].map((item) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <div
-                      key={item.title}
-                      className="rounded-2xl border border-white/80
-                        bg-white/70 p-4 backdrop-blur-xl transition
-                        hover:-translate-y-1 hover:bg-white/95
-                        sm:p-5"
-                    >
-                      <div
-                        className="mb-3 flex h-10 w-10 items-center
-                          justify-center rounded-xl border border-emerald-100
-                          bg-emerald-50 text-emerald-800 sm:mb-4 sm:h-11 sm:w-11"
-                      >
-                        <Icon className="h-5 w-5" />
-                      </div>
-
-                      <h3 className="text-sm font-bold text-emerald-950 sm:text-base">
-                        {item.title}
-                      </h3>
-
-                      <p className="mt-2 text-xs leading-6 text-slate-600 sm:text-sm">
-                        {item.text}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </GlassCard>
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          3. PRINCIPAL AND COORDINATOR
-      ====================================================== */}
-
-      <section
-        id="leadership"
-        className="px-4 py-12 sm:px-6 sm:py-16 lg:py-24"
-      >
-        <div className="mx-auto max-w-7xl">
-          <SectionHeading
-            eyebrow="Our Leadership"
-            title="Guided by Vision. Driven by Education."
-            description="Meet the people dedicated to supporting our students, strengthening our institution, and advancing quality technical education."
-          />
-
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-8">
-            {leadership.map(({ key, label, data, accent }) => (
-              <GlassCard
-                key={key}
-                className="group relative overflow-hidden p-4 sm:p-7 lg:p-8"
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a
+                href="/about"
+                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-800"
               >
-                <div
-                  className={`pointer-events-none absolute -right-16 -top-16
-                    h-48 w-48 rounded-full blur-3xl ${
-                      accent === "lime"
-                        ? "bg-lime-300/25"
-                        : "bg-emerald-300/25"
-                    }`}
-                />
+                Learn About Us
+                <ArrowRight size={17} />
+              </a>
 
-                <div
-                  className="relative flex min-w-0 flex-col
-                    items-center gap-5 text-center
-                    sm:flex-row sm:items-start sm:gap-6 sm:text-left"
-                >
-                  {/* LEADER PHOTO */}
+              <a
+                href="/programs"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-800"
+              >
+                Our Programs
+                <ArrowUpRight size={17} />
+              </a>
+            </div>
+          </motion.div>
 
-                  <div className="w-full shrink-0 sm:w-auto">
-                    <div className="relative mx-auto w-fit">
-                      <div
-                        className={`absolute -inset-2 rounded-[26px] blur-sm ${
-                          accent === "lime"
-                            ? "bg-lime-300/60"
-                            : "bg-emerald-300/60"
-                        }`}
-                      />
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: 25 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="relative"
+          >
+            <div className="absolute -left-5 -top-5 h-32 w-32 rounded-full bg-emerald-200/60 blur-3xl" />
+            <div className="absolute -bottom-5 -right-5 h-32 w-32 rounded-full bg-blue-200/60 blur-3xl" />
 
-                      {data.photo ? (
-                        <img
-                          src={data.photo}
-                          alt={data.name || label}
-                          loading="lazy"
-                          className="relative h-44 w-36 rounded-[22px]
-                            border-4 border-white object-cover shadow-xl
-                            transition duration-500 group-hover:scale-[1.02]
-                            sm:h-48 sm:w-40"
-                        />
-                      ) : (
-                        <div
-                          className="relative flex h-44 w-36 items-center
-                            justify-center rounded-[22px] border-4
-                            border-white bg-emerald-100 text-emerald-800
-                            shadow-xl sm:h-48 sm:w-40"
-                        >
-                          <GraduationCap className="h-14 w-14" />
-                        </div>
-                      )}
+            <GlassCard className="relative overflow-hidden p-3 sm:p-4">
+              <img
+                src={getImageUrl(slides[1]) || DEFAULT_SLIDES[1].image}
+                alt="Agriculture and practical education"
+                className="h-[300px] w-full rounded-2xl object-cover sm:h-[420px]"
+                loading="lazy"
+              />
 
-                      <div
-                        className="absolute -bottom-3 -right-3
-                          flex h-10 w-10 items-center justify-center
-                          rounded-2xl border-4 border-white
-                          bg-emerald-800 text-white shadow-lg"
-                      >
-                        <GraduationCap className="h-5 w-5" />
-                      </div>
-                    </div>
+              <div className="absolute bottom-7 left-7 right-7 rounded-2xl border border-white/60 bg-white/85 p-5 shadow-xl backdrop-blur-xl sm:bottom-9 sm:left-9 sm:right-9">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white">
+                    <Sprout size={25} />
                   </div>
-
-                  {/* LEADER DETAILS */}
-
-                  <div className="min-w-0 w-full flex-1">
-                    <span
-                      className="inline-flex max-w-full items-center
-                        justify-center gap-2 rounded-full border
-                        border-emerald-200 bg-white/80 px-3 py-1.5
-                        text-[10px] font-bold uppercase tracking-wider
-                        text-emerald-800 sm:justify-start sm:text-xs"
-                    >
-                      <Award className="h-3.5 w-3.5 shrink-0" />
-                      {label}
-                    </span>
-
-                    <h3
-                      className="mt-4 break-words text-xl font-black
-                        tracking-tight text-emerald-950 sm:text-2xl"
-                    >
-                      {data.name}
+                  <div>
+                    <h3 className="font-extrabold text-slate-900">
+                      Knowledge into Practice
                     </h3>
-
-                    <p className="mt-1 break-words text-sm font-semibold text-emerald-700">
-                      {data.designation}
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                      Learning, innovation and sustainable agriculture.
                     </p>
-
-                    {data.qualification && (
-                      <p className="mt-1 break-words text-xs leading-5 text-slate-500">
-                        {data.qualification}
-                      </p>
-                    )}
-
-                    {data.message && (
-                      <div
-                        className="mt-4 rounded-2xl border border-white/90
-                          bg-white/70 p-4 text-left backdrop-blur-xl sm:mt-5"
-                      >
-                        <Quote className="mb-2 h-5 w-5 text-emerald-500" />
-
-                        <p className="text-sm italic leading-7 text-slate-600">
-                          {data.message}
-                        </p>
-                      </div>
-                    )}
-
-                    <div
-                      className="mt-5 space-y-3 border-t
-                        border-emerald-100 pt-4 text-left"
-                    >
-                      {data.phone && (
-                        <a
-                          href={`tel:${data.phone}`}
-                          className="flex min-w-0 items-center gap-3
-                            text-sm text-slate-600 transition
-                            hover:text-emerald-800"
-                        >
-                          <span
-                            className="flex h-9 w-9 shrink-0 items-center
-                              justify-center rounded-xl border border-white
-                              bg-white/80 text-emerald-700 shadow-sm"
-                          >
-                            <Phone className="h-4 w-4" />
-                          </span>
-
-                          <span className="min-w-0 break-all">
-                            {data.phone}
-                          </span>
-                        </a>
-                      )}
-
-                      {data.email && (
-                        <a
-                          href={`mailto:${data.email}`}
-                          className="flex min-w-0 items-center gap-3
-                            text-sm text-slate-600 transition
-                            hover:text-emerald-800"
-                        >
-                          <span
-                            className="flex h-9 w-9 shrink-0 items-center
-                              justify-center rounded-xl border border-white
-                              bg-white/80 text-emerald-700 shadow-sm"
-                          >
-                            <Mail className="h-4 w-4" />
-                          </span>
-
-                          <span className="min-w-0 break-all">
-                            {data.email}
-                          </span>
-                        </a>
-                      )}
-
-                      <a
-                        href="#contact"
-                        className="inline-flex items-center gap-2 pt-2
-                          text-sm font-bold text-emerald-800 transition
-                          hover:gap-3 hover:text-emerald-600"
-                      >
-                        Get in touch
-                        <ArrowRight className="h-4 w-4" />
-                      </a>
-                    </div>
                   </div>
                 </div>
-              </GlassCard>
-            ))}
+              </div>
+            </GlassCard>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* PRINCIPAL AND COORDINATOR */}
+      <section
+        id="leadership"
+        className="relative overflow-hidden bg-gradient-to-br from-slate-100 via-white to-emerald-50 px-5 py-20 sm:px-8 sm:py-24 lg:px-12"
+      >
+        <div className="pointer-events-none absolute -right-24 top-0 h-80 w-80 rounded-full bg-emerald-200/30 blur-3xl" />
+        <div className="pointer-events-none absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-blue-200/30 blur-3xl" />
+
+        <div className="relative mx-auto max-w-7xl">
+          <SectionHeading
+            eyebrow="Our Leadership"
+            title="Guided by experience. Driven by purpose."
+            description="Meet the people supporting our academic environment, student development and institutional progress."
+          />
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <LeadershipCard
+              title="Principal"
+              person={principal}
+              fallbackName={principalName}
+              accent="blue"
+            />
+
+            <LeadershipCard
+              title="Department Coordinator"
+              person={coordinator}
+              fallbackName={coordinatorName}
+              accent="emerald"
+            />
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          4. CORE FOCUS AREAS
-      ====================================================== */}
-
+      {/* FOCUS AREAS */}
       <section
-        id="program"
-        className="px-4 py-12 sm:px-6 sm:py-16 lg:py-24"
+        id="focus-areas"
+        className="px-5 py-20 sm:px-8 sm:py-28 lg:px-12"
       >
         <div className="mx-auto max-w-7xl">
           <SectionHeading
-            eyebrow="Academic Excellence"
-            title="Explore Our Focus Areas"
-            description="Discover the disciplines and practical skills that connect Plant Science education with modern agricultural opportunities."
+            eyebrow="What We Focus On"
+            title="Building skills for a greener future."
+            description="A learning environment that brings together scientific understanding, practical experience and responsible development."
           />
 
-          <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 sm:gap-5">
-            {(CORE_FOCUS_AREAS || []).map((area, index) => {
-              const Icon = focusIcons[index % focusIcons.length];
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {focusAreas.map((area, index) => {
+              const Icon =
+                area.iconComponent ||
+                area.Icon ||
+                area.icon ||
+                [
+                  Sprout,
+                  BookOpen,
+                  Leaf,
+                  GraduationCap,
+                ][index % 4];
+
+              const SafeIcon =
+                typeof Icon === "function" ? Icon : Sprout;
 
               return (
-                <GlassCard
-                  key={area.code || area.title}
-                  className="group min-w-0 p-5 sm:p-7"
+                <motion.div
+                  key={area.id || area.title || index}
+                  initial={
+                    reduceMotion ? false : { opacity: 0, y: 20 }
+                  }
+                  whileInView={
+                    reduceMotion ? undefined : { opacity: 1, y: 0 }
+                  }
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{
+                    duration: 0.45,
+                    delay: index * 0.08,
+                  }}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div
-                      className="flex h-12 w-12 shrink-0 items-center
-                        justify-center rounded-2xl border border-emerald-100
-                        bg-white/80 text-emerald-800 shadow-sm transition
-                        duration-300 group-hover:-translate-y-1
-                        group-hover:bg-emerald-800 group-hover:text-white
-                        sm:h-14 sm:w-14"
-                    >
-                      <Icon className="h-6 w-6" />
+                  <GlassCard className="group h-full p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-[0_24px_60px_rgba(16,185,129,0.12)] sm:p-7">
+                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 transition duration-300 group-hover:bg-emerald-500 group-hover:text-white">
+                      <SafeIcon size={26} />
                     </div>
 
-                    {area.code && (
-                      <span
-                        className="max-w-[55%] break-words rounded-lg
-                          border border-emerald-100 bg-white/70
-                          px-2 py-1.5 text-right font-mono text-xs
-                          font-bold text-emerald-800 sm:px-3"
-                      >
-                        {area.code}
-                      </span>
-                    )}
-                  </div>
+                    <h3 className="text-xl font-extrabold text-slate-900">
+                      {area.title || area.name || "Learning"}
+                    </h3>
 
-                  <h3
-                    className="mt-5 break-words text-base font-extrabold
-                      text-emerald-950 transition
-                      group-hover:text-emerald-700 sm:mt-6 sm:text-lg"
-                  >
-                    {area.title}
-                  </h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      {area.description ||
+                        area.details ||
+                        "Develop knowledge and practical skills for the future."}
+                    </p>
 
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    {area.description}
-                  </p>
-
-                  <div
-                    className="mt-5 flex flex-wrap gap-2
-                      border-t border-emerald-100/80 pt-4"
-                  >
-                    {(area.skills || []).map((skill) => (
-                      <span
-                        key={skill}
-                        className="max-w-full break-words rounded-full
-                          border border-emerald-100 bg-white/70
-                          px-3 py-1.5 text-xs font-medium text-emerald-800"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </GlassCard>
+                    <div className="mt-6 flex items-center gap-2 text-sm font-bold text-emerald-700">
+                      Learn and grow
+                      <ArrowRight
+                        size={16}
+                        className="transition-transform group-hover:translate-x-1"
+                      />
+                    </div>
+                  </GlassCard>
+                </motion.div>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          5. ALUMNI TESTIMONIALS
-      ====================================================== */}
-
-     {/* ALUMNI SECTION */}
-<section
-  id="alumni"
-  className="relative isolate overflow-hidden bg-gradient-to-b from-white via-emerald-50/60 to-white px-4 py-14 sm:px-6 sm:py-20 lg:py-24"
->
-  {/* Animated background decorations */}
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-  >
-    <motion.div
-      animate={{ x: [0, 35, 0], y: [0, -25, 0] }}
-      transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      className="absolute -left-24 top-10 h-64 w-64 rounded-full bg-emerald-200/40 blur-3xl sm:h-80 sm:w-80"
-    />
-    <motion.div
-      animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
-      transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-      className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-lime-200/40 blur-3xl sm:h-96 sm:w-96"
-    />
-    <div className="absolute inset-0 bg-[radial-gradient(#05966912_1px,transparent_1px)] [background-size:24px_24px]" />
-  </div>
-
-  <div className="mx-auto max-w-7xl">
-    <SectionHeading
-      eyebrow="Our Alumni Network"
-      title="Learning That Goes Beyond the Classroom"
-      description="Discover the experiences and journeys of former students as they pursue further education and professional opportunities."
-    />
-
-    {/* Highlight banner */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6 }}
-      className="relative mb-8 mt-8 overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-5 shadow-[0_12px_45px_-20px_rgba(5,150,105,0.25)] backdrop-blur-xl sm:mb-10 sm:p-7"
-    >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-600/20">
-            <GraduationCap className="h-7 w-7" />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-              Once a student, always a part of us
-            </p>
-            <h3 className="mt-1 text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">
-              The Triveni legacy continues.
-            </h3>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              Every achievement inspires the next generation.
-            </p>
-          </div>
-        </div>
-
-        <span className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800">
-          <Sparkles className="h-4 w-4" />
-          Proudly Triveni
-        </span>
-      </div>
-    </motion.div>
-
-    {/* Alumni cards */}
-    <div className="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {(ALUMNI_TESTIMONIALS || []).map((alum, index) => (
-        <motion.div
-          key={alum.id}
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.12 }}
-          transition={{
-            duration: 0.55,
-            delay: (index % 4) * 0.1,
-          }}
-          whileHover={{ y: -7 }}
-          className="group relative min-w-0"
-        >
-          {/* Hover glow */}
-          <div className="absolute -inset-px rounded-[1.6rem] bg-gradient-to-br from-emerald-400/40 via-teal-300/10 to-lime-300/40 opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100" />
-
-          <GlassCard className="relative flex h-full min-w-0 flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/75 p-5 shadow-[0_8px_35px_-20px_rgba(15,23,42,0.25)] backdrop-blur-xl transition-all duration-500 group-hover:border-emerald-200 group-hover:bg-white/95 group-hover:shadow-[0_20px_50px_-25px_rgba(5,150,105,0.35)] sm:p-6">
-            {/* Card decoration */}
-            <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-100/60 blur-2xl transition-transform duration-700 group-hover:scale-150" />
-
-            <div className="relative">
-              <div className="flex items-center justify-between gap-3">
-                <motion.div
-                  animate={{ rotate: [0, -4, 4, 0] }}
-                  transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    delay: index * 0.25,
-                  }}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 transition-colors duration-300 group-hover:bg-emerald-600 group-hover:text-white"
-                >
-                  <Quote className="h-5 w-5" />
-                </motion.div>
-
-                <span className="max-w-[65%] truncate rounded-full border border-emerald-100 bg-emerald-50/80 px-3 py-1.5 text-[11px] font-extrabold text-emerald-800">
-                  {alum.batch}
-                </span>
-              </div>
-
-              <p className="mt-5 break-words text-sm italic leading-7 text-slate-600">
-                “{alum.quote}”
-              </p>
-            </div>
-
-            {/* Alumni profile */}
-            <div className="relative mt-6 border-t border-emerald-100/80 pt-5">
-              <div className="flex min-w-0 items-start gap-3">
-                <img
-                  src={alum.avatar}
-                  alt={alum.name || "Alumni profile"}
-                  loading="lazy"
-                  className="h-12 w-12 shrink-0 rounded-2xl border-2 border-white object-cover shadow-md ring-1 ring-emerald-100 transition-transform duration-500 group-hover:scale-105 sm:h-14 sm:w-14"
-                />
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="break-words text-sm font-extrabold leading-5 text-emerald-950">
-                      {alum.name}
-                    </h3>
-
-                    {alum.name?.includes("Bibash") && onOpenDeveloper && (
-                      <button
-                        type="button"
-                        onClick={onOpenDeveloper}
-                        className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-lime-200 bg-lime-100 px-2 py-1 text-[10px] font-extrabold text-emerald-950 transition hover:bg-lime-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
-                      >
-                        Developer
-                        <ArrowUpRight className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-
-                  <p className="mt-1 break-words text-xs font-bold leading-5 text-emerald-700">
-                    {alum.currentRole}
-                  </p>
-
-                  <p className="mt-1 break-words text-xs leading-5 text-slate-500">
-                    {alum.affiliation}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </GlassCard>
-        </motion.div>
-      ))}
-    </div>
-
-    {/* Closing message */}
-    <motion.p
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="mt-10 text-center text-sm leading-6 text-slate-500 sm:mt-12"
-    >
-      <span className="font-bold text-emerald-700">
-        One school. Many journeys.
-      </span>{" "}
-      A shared legacy that keeps growing.
-    </motion.p>
-  </div>
-</section>
-      {/* =====================================================
-          6. TEACHERS AND STAFF
-      ====================================================== */}
-
+      {/* TEACHER SEARCH */}
       <section
         id="teachers"
-        className="px-4 py-12 sm:px-6 sm:py-16 lg:py-24"
+        className="bg-white px-5 py-20 sm:px-8 sm:py-24 lg:px-12"
       >
         <div className="mx-auto max-w-7xl">
           <SectionHeading
-            eyebrow="Our Faculty"
-            title="Meet Our Dedicated Educators"
-            description="Learn about the teachers and academic staff who support student learning and practical skill development."
+            eyebrow="Our Academic Team"
+            title="Meet our teachers."
+            description="Explore the academic team supporting teaching, learning and student development."
           />
 
-          <GlassCard className="min-w-0 p-4 sm:p-7 lg:p-10">
-            <div
-              className="mb-6 flex flex-col gap-4
-                md:flex-row md:items-center md:justify-between sm:mb-8"
-            >
-              <div className="min-w-0">
-                <h3 className="text-lg font-extrabold text-emerald-950 sm:text-xl">
-                  Faculty & Academic Staff
-                </h3>
+          <div className="mx-auto mb-9 max-w-xl">
+            <label htmlFor="teacher-search" className="sr-only">
+              Search teachers
+            </label>
 
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Find a teacher by name, role, or subject.
-                </p>
-              </div>
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-100">
+              <Search className="shrink-0 text-slate-400" size={21} />
 
-              <div className="relative w-full md:max-w-sm">
-                <Search
-                  className="absolute left-4 top-1/2 h-4 w-4
-                    -translate-y-1/2 text-emerald-700"
-                />
-
-                <input
-                  type="search"
-                  value={teacherSearch}
-                  onChange={(event) => setTeacherSearch(event.target.value)}
-                  placeholder="Search teachers..."
-                  aria-label="Search teachers by name, role, or subject"
-                  className="w-full rounded-2xl border border-emerald-100
-                    bg-white/80 py-3.5 pl-11 pr-4 text-sm text-slate-800
-                    shadow-sm outline-none backdrop-blur-xl transition
-                    placeholder:text-slate-400 focus:border-emerald-400
-                    focus:ring-4 focus:ring-emerald-100"
-                />
-              </div>
+              <input
+                id="teacher-search"
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search by teacher name, subject or role..."
+                className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+              />
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 sm:gap-5">
-              {filteredTeachers.map((teacher) => (
-                <div
-                  key={teacher.id}
-                  className="flex min-w-0 flex-col justify-between
-                    rounded-2xl border border-white/90 bg-white/70
-                    p-4 backdrop-blur-xl transition
-                    hover:-translate-y-1 hover:bg-white/95
-                    hover:shadow-xl hover:shadow-emerald-900/5 sm:p-5"
-                >
-                  <div className="min-w-0">
-                    <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                      {teacher.photo ? (
+          {filteredTeachers.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredTeachers.map((teacher, index) => {
+                const name = getText(
+                  teacher.name || teacher.fullName,
+                  "Academic Team Member"
+                );
+
+                const photo =
+                  teacher.image ||
+                  teacher.photo ||
+                  teacher.imageUrl ||
+                  teacher.photoUrl ||
+                  "";
+
+                return (
+                  <GlassCard
+                    key={teacher.id || teacher.email || `${name}-${index}`}
+                    className="overflow-hidden transition hover:-translate-y-1"
+                  >
+                    <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+                      {photo ? (
                         <img
-                          src={teacher.photo}
-                          alt={teacher.name}
+                          src={photo}
+                          alt={name}
                           loading="lazy"
-                          className="h-14 w-14 shrink-0 rounded-2xl
-                            border-2 border-white object-cover shadow-md
-                            sm:h-16 sm:w-16"
+                          className="h-full w-full object-cover transition duration-500 hover:scale-105"
                         />
                       ) : (
-                        <div
-                          className="flex h-14 w-14 shrink-0 items-center
-                            justify-center rounded-2xl bg-emerald-100
-                            text-emerald-800 sm:h-16 sm:w-16"
-                        >
-                          <GraduationCap className="h-7 w-7" />
+                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-emerald-50 to-blue-50">
+                          <Users size={45} className="text-emerald-700" />
                         </div>
                       )}
-
-                      <div className="min-w-0 flex-1">
-                        <h3 className="break-words text-sm font-bold text-emerald-950 sm:text-base">
-                          {teacher.name}
-                        </h3>
-
-                        <p className="mt-1 break-words text-sm font-semibold text-emerald-700">
-                          {teacher.role}
-                        </p>
-
-                        <p className="mt-1 break-words text-xs leading-5 text-slate-500">
-                          {teacher.qualification}
-                        </p>
-                      </div>
                     </div>
 
-                    <div
-                      className="mt-5 space-y-3 rounded-xl border
-                        border-white/80 bg-white/70 p-3 sm:p-4"
-                    >
-                      <div className="flex min-w-0 items-start gap-3">
-                        <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                    <div className="p-5">
+                      <h3 className="font-extrabold text-slate-900">
+                        {name}
+                      </h3>
 
-                        <p className="min-w-0 break-words text-xs leading-6 text-slate-600">
-                          <span className="font-bold text-emerald-950">
-                            Teaching:
-                          </span>{" "}
+                      <p className="mt-1 text-sm text-emerald-700">
+                        {teacher.designation ||
+                          teacher.position ||
+                          teacher.role ||
+                          "Teacher"}
+                      </p>
+
+                      {teacher.subject && (
+                        <p className="mt-2 text-sm text-slate-500">
                           {teacher.subject}
                         </p>
-                      </div>
+                      )}
 
-                      <div className="flex min-w-0 items-start gap-3">
-                        <Award className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
-
-                        <p className="min-w-0 break-words text-xs leading-6 text-slate-600">
-                          <span className="font-bold text-emerald-950">
-                            Specialty:
-                          </span>{" "}
-                          {teacher.specialty}
-                        </p>
-                      </div>
+                      {teacher.email && (
+                        <a
+                          href={`mailto:${teacher.email}`}
+                          className="mt-4 inline-flex items-center gap-2 break-all text-xs font-semibold text-slate-600 hover:text-emerald-700"
+                        >
+                          <Mail size={14} />
+                          {teacher.email}
+                        </a>
+                      )}
                     </div>
-                  </div>
-
-                  <div
-                    className="mt-5 flex flex-wrap items-center
-                      justify-between gap-3 border-t
-                      border-emerald-100 pt-4"
-                  >
-                    {teacher.phone ? (
-                      <a
-                        href={`tel:${teacher.phone}`}
-                        className="inline-flex items-center gap-2
-                          text-xs font-semibold text-emerald-800
-                          hover:text-emerald-600"
-                      >
-                        <Phone className="h-4 w-4" />
-                        Call
-                      </a>
-                    ) : (
-                      <span />
-                    )}
-
-                    {teacher.email && (
-                      <a
-                        href={`mailto:${teacher.email}`}
-                        className="inline-flex items-center gap-2
-                          break-all text-xs font-semibold text-slate-600
-                          hover:text-emerald-800"
-                      >
-                        <Mail className="h-4 w-4 shrink-0" />
-                        Send Email
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {filteredTeachers.length === 0 && (
-                <div
-                  className="col-span-full rounded-2xl border
-                    border-white/80 bg-white/70 p-8 text-center sm:p-10"
-                >
-                  <Search className="mx-auto h-8 w-8 text-emerald-600" />
-
-                  <h3 className="mt-4 font-bold text-emerald-950">
-                    No teachers found
-                  </h3>
-
-                  <p className="mt-2 text-sm text-slate-600">
-                    Try another name, role, or subject.
-                  </p>
-                </div>
-              )}
+                  </GlassCard>
+                );
+              })}
             </div>
-          </GlassCard>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+              <Users className="mx-auto mb-4 text-slate-400" size={35} />
+
+              <h3 className="text-lg font-bold text-slate-800">
+                {teachers.length === 0
+                  ? "Academic team information will be added soon."
+                  : "No matching teachers found."}
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-500">
+                {teachers.length === 0
+                  ? "Teacher profiles can be managed in the school data file."
+                  : "Try another name, subject or designation."}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-9 text-center">
+            <a
+              href="/about"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 font-bold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-800"
+            >
+              Learn More About Our Team
+              <ArrowRight size={17} />
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* =====================================================
-          7. FINAL CALL TO ACTION
-      ====================================================== */}
+      {/* STUDENT AND ALUMNI VOICES */}
+      <section
+        id="testimonials"
+        className="relative overflow-hidden bg-slate-950 px-5 py-20 sm:px-8 sm:py-24 lg:px-12"
+      >
+        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-emerald-500/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-blue-500/15 blur-3xl" />
 
-      <section className="px-4 pb-16 pt-6 sm:px-6 sm:pb-24 sm:pt-8 lg:pb-28">
-        <div
-          className="relative mx-auto max-w-7xl overflow-hidden
-            rounded-3xl border border-white/20
-            bg-gradient-to-br from-emerald-950 via-emerald-900
-            to-green-800 px-5 py-12 text-center
-            shadow-[0_25px_80px_rgba(6,55,30,0.18)]
-            sm:rounded-[32px] sm:px-12 sm:py-20"
-        >
-          <div
-            className="pointer-events-none absolute -left-20 -top-20
-              h-56 w-56 rounded-full border border-white/10
-              bg-white/5 blur-2xl sm:h-64 sm:w-64"
-          />
-
-          <div
-            className="pointer-events-none absolute -bottom-24 -right-16
-              h-64 w-64 rounded-full border border-white/10
-              bg-lime-300/10 blur-2xl sm:h-72 sm:w-72"
-          />
-
-          <div className="relative z-10 mx-auto max-w-3xl">
-            <span
-              className="inline-flex max-w-full items-center justify-center
-                gap-2 rounded-full border border-white/20 bg-white/10
-                px-4 py-2 text-[10px] font-bold uppercase
-                tracking-widest text-lime-200 backdrop-blur-xl sm:text-xs"
-            >
-              <Sprout className="h-4 w-4 shrink-0" />
-              Your Future Starts Here
+        <div className="relative mx-auto max-w-7xl">
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.17em] text-emerald-300">
+              <Quote size={14} />
+              Voices of Our Community
             </span>
 
-            <h2
-              className="mt-5 text-2xl font-black leading-tight
-                tracking-tight text-white min-[400px]:text-3xl
-                sm:mt-6 sm:text-4xl lg:text-5xl"
-            >
-              Ready to Grow With Us?
+            <h2 className="text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
+              Learning experiences that matter.
             </h2>
 
-            <p
-              className="mx-auto mt-4 max-w-2xl text-sm
-                leading-7 text-white/85 sm:mt-5 sm:text-base sm:leading-8"
-            >
-              Discover our programs, connect with our school, and explore
-              opportunities in technical and agricultural education.
+            <p className="mt-4 text-base leading-7 text-slate-300">
+              The value of education is reflected in the experiences,
+              confidence and growth of our learning community.
             </p>
+          </div>
 
-            <div
-              className="mt-7 flex flex-col justify-center gap-3
-                min-[480px]:flex-row min-[480px]:flex-wrap sm:mt-8"
-            >
+          <div className="grid gap-5 md:grid-cols-2">
+            {testimonials.slice(0, 4).map((item, index) => (
+              <motion.div
+                key={item.id || item.name || index}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                whileInView={
+                  reduceMotion ? undefined : { opacity: 1, y: 0 }
+                }
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+              >
+                <div className="h-full rounded-3xl border border-white/10 bg-white/[0.07] p-7 backdrop-blur-xl transition hover:bg-white/[0.1] sm:p-8">
+                  <Quote size={28} className="mb-5 text-emerald-400" />
+
+                  <p className="text-base leading-8 text-slate-200">
+                    “
+                    {item.quote ||
+                      item.testimonial ||
+                      item.message ||
+                      "Education provides the foundation for learning, growth and future opportunities."}
+                    ”
+                  </p>
+
+                  <div className="mt-7 border-t border-white/10 pt-5">
+                    <h3 className="font-bold text-white">
+                      {item.name || "School Community"}
+                    </h3>
+                    <p className="mt-1 text-sm text-emerald-300">
+                      {item.role || item.designation || "Our Community"}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL CALL TO ACTION */}
+      <section className="px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-700 via-emerald-800 to-slate-900 px-6 py-12 shadow-2xl sm:px-12 sm:py-16 lg:px-16">
+          <div className="pointer-events-none absolute -right-10 -top-24 h-72 w-72 rounded-full border-[45px] border-white/5" />
+          <div className="pointer-events-none absolute -bottom-36 right-1/3 h-72 w-72 rounded-full bg-emerald-400/15 blur-3xl" />
+
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+            <div>
+              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-100">
+                <GraduationCap size={16} />
+                Your Future Starts Here
+              </span>
+
+              <h2 className="max-w-3xl text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
+                Ready to grow your knowledge and shape the future?
+              </h2>
+
+              <p className="mt-4 max-w-2xl text-base leading-7 text-emerald-50/90">
+                Explore our programs, discover learning opportunities and
+                connect with {schoolName}.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 lg:flex-col">
               <a
-                href="#program"
-                className="inline-flex min-h-12 items-center
-                  justify-center gap-2 rounded-xl bg-lime-300
-                  px-6 py-3 text-sm font-bold text-emerald-950
-                  transition hover:-translate-y-0.5 hover:bg-lime-200
-                  sm:rounded-2xl"
+                href="/programs"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 font-bold text-emerald-800 transition hover:-translate-y-0.5 hover:bg-emerald-50"
               >
                 Explore Programs
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight size={18} />
               </a>
 
               <a
-                href="#leadership"
-                className="inline-flex min-h-12 items-center
-                  justify-center gap-2 rounded-xl border
-                  border-white/30 bg-white/10 px-6 py-3
-                  text-sm font-bold text-white backdrop-blur-xl
-                  transition hover:bg-white/20 sm:rounded-2xl"
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3.5 font-bold text-white backdrop-blur-xl transition hover:bg-white/20"
               >
-                Meet Our Leadership
+                Contact Our School
+                <ArrowUpRight size={18} />
               </a>
             </div>
           </div>
@@ -1326,3 +1008,6 @@ export default function HomeSection({
     </main>
   );
 }
+
+export default HomeSection;
+```
